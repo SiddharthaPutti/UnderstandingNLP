@@ -15,7 +15,7 @@ There are many ways of representing text/tokens to vector. some of them are:
 5) Word Embeddings.
 
 One-Hot Encoding: 
-  In One Hot encoding each word in the corpus is given a unique number/index. we simply put 1, 0 if the word is present in each document. 
+  In One Hot encoding each word in the corpus is given a unique number/index. we simply put 1, 0 if the word is present in each document. \n
   which makes it a large sparse representation. 
   The size of the vector directly proportional to size of the vovab. 
   There is no relationship captured between the words. 
