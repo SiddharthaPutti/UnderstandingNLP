@@ -10,14 +10,14 @@ There are many ways of representing text/tokens to vector. some of them are:
 1) One-Hot Encoding.
 2) Bag of Words.
 3) N-Grams.
-4) TF-IDF.
-    Distributed Representations: 
-5) Word Embeddings.
+4) TF-IDF.  
+    Distributed Representations:  
+5) Word Embeddings.  
 
 One-Hot Encoding:  
   * In One Hot encoding each word in the corpus is given a unique number/index. we simply put 1, 0 if the word is present in each document.  
   * which makes it a large sparse representation.  
-  * The size of the vector directly proportional to size of the vovab.  
+  * The size of the vector directly proportional to size of the vocab.  
   * There is no relationship captured between the words.  
   
 Bag Of Words:  
@@ -49,6 +49,7 @@ TF-IDF:
     * tf = (no of occurance of word in doc) / (total no of terms in doc)  
   * Inv-Doc Freq: measures the importance of word across the corpus.  
     * idf = (total no of docs) / (no of docs with that word in them)  
+  * Now tf*idf  
   
   * """ from sklearn.feature_extraction.text import TfidfVectorizer """  
   
@@ -60,7 +61,13 @@ TF-IDF:
   
 Distributed Representations:  
   * Word Embeddings:  
-    These are NN based methods for dense(low dimensional) representations of words. 94pg  
+    These are NN based methods for dense(low dimensional) representations of words.  
+    given the word USA, it must be similar to Canada, China etc... this usually called as distributional similarity. these can be considered as distributionally similar.  
+    One of the popular model to capture distibutional similarity is "Word2Vec".  
+        * This works well to capture anologies like king- Man+Woman~ Queen.
+        * This representaion is also called as Embeddings. This ensures vector to be dense(very less sparse- less 0's)
+        * if two different words occurs in similar context, then its highly likely that meaning of the words are aslo similar.  
+        *  
   
   
   
