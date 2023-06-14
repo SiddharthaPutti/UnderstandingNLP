@@ -24,7 +24,9 @@ Bag Of Words:
   * Dont get confused by the name(BoW). This method is generally used in text classification problems although it has its cons. let's see how it works in the first place.  
   * Instead of 0, 1 as One-Hot Encoding does, replace it with the number of times the word is seen in the particular document.  
   * now imagine that there are two documents, [2,4,0,3,2,1] and [2,3,1,4,4,1]. calculate the distance between both documents, which will be a lower value. that represents both documents might be similar.  
-  * ''' from sklearn.feature_extraction.text import CountVectorizer '''   
+  * '''python
+     from sklearn.feature_extraction.text import CountVectorizer
+    '''   
   
   * same as before, we have a large sparse vector, as the vocab increases.  
   * It doesn't capture similarity/relationship b/n different words. "I run", "I ran", and "I ate" All three vectors will be equally apart.  
