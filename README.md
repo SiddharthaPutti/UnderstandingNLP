@@ -99,7 +99,7 @@ One of the popular models to capture distributional similarity is "Word2Vec".
 
     # appending to data, creating inputs 
     data = []
-    for i in range(window_size, len(raw_text) -2):
+    for i in range(window_size, len(raw_text) -window_size):
         context = raw_text[i-window_size: i] + raw_text[i+1: raw_text[i+window_size+1]
         target = raw_text[i]
         data.append((context,target))
