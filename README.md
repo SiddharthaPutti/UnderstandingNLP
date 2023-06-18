@@ -71,7 +71,15 @@ Distributed Representations:
         * This works well to capture analogies like King- Man+Woman~ Queen.
         * This representation is also called Embedding. This ensures the vector is dense(very less sparse- less 0's)
         * if two different words occur in a similar context, then it's highly likely that the meanings of the words are also similar.  
-        *  Some of the other pre-trained Embeddings are GloVe by stanford, fasttext by facebook...  
+        *  Some of the other pre-trained Embeddings are GloVe by stanford, fasttext by facebook...
+        * fortunately, embeddings like word2vec have already pre-trained versions. you can load the pre-trained versions of word2vec and get the embeddings of words in your required length.
+
+    You can also train your own word embeddings, for this there are two main proposed architectures:
+        * CBOW - continuous bag of words
+            * This is like filling the blanks kind of learning: the model tries to predict the center word given the rest of the context. In this method, the model tries to assign probabilities in such a way that the context makes sense.
+            * It takes every word in the corpus as the target and assigns prob to every word with respect to a given context.
+        * SkipGram: given the center word predict the context words. 
+    
     
   
   
