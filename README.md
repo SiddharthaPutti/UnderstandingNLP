@@ -67,24 +67,25 @@ Distributed Representations:
   * Word Embeddings:  
     These are NN-based methods for dense(low dimensional) representations of words.  
     given the word USA, it must be similar to Canada, China, etc... this is usually called distributional similarity. these can be considered distributionally similar.  
-    One of the popular models to capture distributional similarity is "Word2Vec".  
-        # This works well to capture analogies like King- Man+Woman~ Queen.  
-        # This representation is also called Embedding. This ensures the vector is dense(very less sparse- less 0's)  
-        # if two different words occur in a similar context, then it's highly likely that the meanings of the words are also similar.  
-        #  Some of the other pre-trained Embeddings are GloVe by stanford, fasttext by facebook...  
-        # fortunately, embeddings like word2vec have already pre-trained versions. you can load the pre-trained versions of word2vec and get the embeddings of words in your required length.  
+One of the popular models to capture distributional similarity is "Word2Vec".  
+    * This works well to capture analogies like King- Man+Woman~ Queen.  
+    * This representation is also called Embedding. This ensures the vector is dense(very less sparse- less 0's)  
+    * If two different words occur in a similar context, then it's highly likely that the meanings of the words are also similar.  
+    *  Some of the other pre-trained Embeddings are GloVe by Stanford, fasttext by Facebook...  
+    * fortunately, embeddings like word2vec have already pre-trained versions. you can load the pre-trained versions of word2vec and get the embeddings of words in your required length.  
 
     You can also train your own word embeddings, for this there are two main proposed architectures:  
-        # CBOW - continuous bag of words  
-            * This is like filling the blanks kind of learning: the model tries to predict the center word given the rest of the context. In this method, the model tries to assign probabilities in such a way that the context makes sense.  
-            * It takes every word in the corpus as the target and assigns prob to every word with respect to a given context.
-            * Input:
-                * take a fixed window size for example 10, that is 20 words at a time from a document. 10 before and 10 after the center word  
-                * create a one-hot representation of each word, the matrix for a window size of 10 will now be: (window_size *2, vocab_size)  
-                * slide the window for the next 20 words, that is slide for one word at a time, this will again create a matrix of size: (window_size *2, vocab_size)  
-                * continue this process until the end of the document, pad the document if necessary to include all the context. this will create a number of matrices, concatenate them all to make it a large sparse matrix, and serve as input to NN.
-                * if you are using embeddings like word2vec, the process is similar, but the size of the matrix changes to (window_size*2, embedding_dim), that is each word will have a fixed embedding length.  
-        * SkipGram: given the center word predict the context words.  
+    * CBOW - continuous bag of words  
+        * This is like filling the blanks kind of learning: the model tries to predict the center word given the rest of the context. In this method, the model tries to assign probabilities in such a way that the context makes sense.  
+        * It takes every word in the corpus as the target and assigns prob to every word with respect to a given context.
+        * Input:
+            * take a fixed window size for example 10, that is 20 words at a time from a document. 10 before and 10 after the center word  
+            * Create a one-hot representation of each word, the matrix for a window size of 10 will now be: (window_size *2, vocab_size) {except the center word}  
+            * slide the window for the next 20 words, that is slide for one word at a time, this will again create a matrix of size: (window_size *2, vocab_size)  
+            * continue this process until the end of the document, pad the document if necessary to include all the context. this will create a number of matrices, concatenate them all to make it a large sparse matrix, and serve as input to NN.
+            * if you are using embeddings like word2vec, the process is similar, but the size of the matrix changes to (window_size*2, embedding_dim), that is each word will have a fixed embedding length.
+            * Output will be (the_no_of_concatenated_windows, vocab), for each window predict the prob distribution of the entire vocab and select the highest prob word.  
+    * SkipGram: given the center word predict the context words.  
     
     
   
