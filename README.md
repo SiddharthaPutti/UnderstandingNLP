@@ -68,14 +68,14 @@ Distributed Representations:
     These are NN-based methods for dense(low dimensional) representations of words.  
     given the word USA, it must be similar to Canada, China, etc... this is usually called distributional similarity. these can be considered distributionally similar.  
     One of the popular models to capture distributional similarity is "Word2Vec".  
-        * This works well to capture analogies like King- Man+Woman~ Queen.  
-        * This representation is also called Embedding. This ensures the vector is dense(very less sparse- less 0's)  
-        * if two different words occur in a similar context, then it's highly likely that the meanings of the words are also similar.  
-        *  Some of the other pre-trained Embeddings are GloVe by stanford, fasttext by facebook...  
-        * fortunately, embeddings like word2vec have already pre-trained versions. you can load the pre-trained versions of word2vec and get the embeddings of words in your required length.  
+        # This works well to capture analogies like King- Man+Woman~ Queen.  
+        # This representation is also called Embedding. This ensures the vector is dense(very less sparse- less 0's)  
+        # if two different words occur in a similar context, then it's highly likely that the meanings of the words are also similar.  
+        #  Some of the other pre-trained Embeddings are GloVe by stanford, fasttext by facebook...  
+        # fortunately, embeddings like word2vec have already pre-trained versions. you can load the pre-trained versions of word2vec and get the embeddings of words in your required length.  
 
     You can also train your own word embeddings, for this there are two main proposed architectures:  
-        * CBOW - continuous bag of words  
+        # CBOW - continuous bag of words  
             * This is like filling the blanks kind of learning: the model tries to predict the center word given the rest of the context. In this method, the model tries to assign probabilities in such a way that the context makes sense.  
             * It takes every word in the corpus as the target and assigns prob to every word with respect to a given context.
             * Input:
