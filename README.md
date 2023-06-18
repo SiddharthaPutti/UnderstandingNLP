@@ -80,11 +80,38 @@ One of the popular models to capture distributional similarity is "Word2Vec".
         * It takes every word in the corpus as the target and assigns prob to every word with respect to a given context.
         * Input:
             * take a fixed window size for example 10, that is 20 words at a time from a document. 10 before and 10 after the center word  
-            * Create a one-hot representation of each word, the matrix for a window size of 10 will now be: (window_size *2, vocab_size) {except the center word}  
+            * Create a one-hot(or indexed) representation of each word, the matrix for a window size of 10 will now be: (window_size *2, vocab_size) {except the center word}  
             * slide the window for the next 20 words, that is slide for one word at a time, this will again create a matrix of size: (window_size *2, vocab_size)  
             * continue this process until the end of the document, pad the document if necessary to include all the context. this will create a number of matrices, concatenate them all to make it a large sparse matrix, and serve as input to NN.
             * if you are using embeddings like word2vec, the process is similar, but the size of the matrix changes to (window_size*2, embedding_dim), that is each word will have a fixed embedding length.
-            * Output will be (the_no_of_concatenated_windows, vocab), for each window predict the prob distribution of the entire vocab and select the highest prob word.  
+            * Output will be (the_no_of_concatenated_windows, vocab), for each window predict the prob distribution of the entire vocab and select the highest prob word.
+    ```python
+    # vocabulary 
+    vocab = set(raw_text) 
+
+    # converting words to indexes and indexes to words, just creating of dictionary to map them
+    word_to_index = {word:index for index, word in enumerate(vocab)}
+    index_to_word = {index:word for index, word in enumerate(vocab)}
+    
+    def create_context(context, word_to_index):
+        ids = [word_to_index[w] for w in context]
+        return ids
+
+    # appending to data, creating inputs 
+    data = []
+    for i in range(window_size, len(raw_text) -2):
+        context = raw_text[i-window_size: i] + raw_text[i+1: raw_text[i+window_size+1]
+        target = raw_text[i]
+        data.append((context,target))
+              
+    # for each epoch run the following in training loop 
+    for context, target in data: 
+        context_vector = create_context(context, word_to_index)
+        log_pob = model(context_vector)
+        loss = #
+    
+    ```  
+    
     * SkipGram: given the center word predict the context words.  
     
     
