@@ -110,10 +110,78 @@ One of the popular models to capture distributional similarity is "Word2Vec".
         log_pob = model(context_vector)
         loss = #
     
-    ```  
+    ```
+    now that you have trained a CBOW model, the word embeddings are the weights of the hidden layer. the first row of the hidden layer representation is the word embeddings for the 0th word. the hidden layer dims (vocab_size, embedding_dim)
     
     * SkipGram: given the center word predict the context words.  
+        * we run a sliding window of size 2k+1, k words before the center word and k words after the center word, +1 for the center word.  
+        * Similar to the CBOW, the word embeddings are weights of the hidden layer.
+    ```python
+    import numpy as np
     
+    sentence = "The quick brown fox jumps over the lazy dog"
+    window_size = 5
+    words = sentence.lower().split()
+    words = ['<pad>'] * window_size + words + ['<pad>']* window_size
+    
+    vocab = sorted(set(words))
+    
+    word2idx = {word: idx for idx, word in enumerate(vocab)}
+    
+    idx2word = {idx: word for word, idx in word2idx.items()}
+    
+    X_train = [] 
+    y_train = [] 
+    
+    for i in range(window_size, len(words)-window_size):
+        target_word = words[i]
+        target_idx = word2idx[target_word]
+    
+        context_words = []
+        for j in range(i - window_size, i + window_size + 1):
+            if j != i and 0 <= j < len(words):
+                context_word = words[j]
+                context_idx = word2idx[context_word]
+                context_words.append(context_idx)
+    
+        X_train.append(target_idx)
+        y_train.append(context_words)
+    
+    X_train = np.array(X_train)
+    y_train = np.array(y_train)
+    
+    for i in range(len(X_train)):
+        target_word = idx2word[X_train[i]]
+        context_word = [idx2word[word] for word in y_train[i]]
+        print(f"Target word: {target_word}, Context word: {context_word}")
+    
+    ```
+
+    ```
+    # the output for this code is: 
+    X_train: array([8, 7, 1, 3, 4, 6, 8, 5, 2])
+    y_train: array([[0, 0, 0, 0, 0, 7, 1, 3, 4, 6],
+                   [0, 0, 0, 0, 8, 1, 3, 4, 6, 8],
+                   [0, 0, 0, 8, 7, 3, 4, 6, 8, 5],
+                   [0, 0, 8, 7, 1, 4, 6, 8, 5, 2],
+                   [0, 8, 7, 1, 3, 6, 8, 5, 2, 0],
+                   [8, 7, 1, 3, 4, 8, 5, 2, 0, 0],
+                   [7, 1, 3, 4, 6, 5, 2, 0, 0, 0],
+                   [1, 3, 4, 6, 8, 2, 0, 0, 0, 0],
+                   [3, 4, 6, 8, 5, 0, 0, 0, 0, 0]])
+
+
+    Target word: the, Context word: ['<pad>', '<pad>', '<pad>', '<pad>', '<pad>', 'quick', 'brown', 'fox', 'jumps', 'over']
+    Target word: quick, Context word: ['<pad>', '<pad>', '<pad>', '<pad>', 'the', 'brown', 'fox', 'jumps', 'over', 'the']
+    Target word: brown, Context word: ['<pad>', '<pad>', '<pad>', 'the', 'quick', 'fox', 'jumps', 'over', 'the', 'lazy']
+    Target word: fox, Context word: ['<pad>', '<pad>', 'the', 'quick', 'brown', 'jumps', 'over', 'the', 'lazy', 'dog']
+    Target word: jumps, Context word: ['<pad>', 'the', 'quick', 'brown', 'fox', 'over', 'the', 'lazy', 'dog', '<pad>']
+    Target word: over, Context word: ['the', 'quick', 'brown', 'fox', 'jumps', 'the', 'lazy', 'dog', '<pad>', '<pad>']
+    Target word: the, Context word: ['quick', 'brown', 'fox', 'jumps', 'over', 'lazy', 'dog', '<pad>', '<pad>', '<pad>']
+    Target word: lazy, Context word: ['brown', 'fox', 'jumps', 'over', 'the', 'dog', '<pad>', '<pad>', '<pad>', '<pad>']
+    Target word: dog, Context word: ['fox', 'jumps', 'over', 'the', 'lazy', '<pad>', '<pad>', '<pad>', '<pad>', '<pad>']
+
+    ```
     
   
   
