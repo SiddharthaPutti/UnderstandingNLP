@@ -182,6 +182,28 @@ One of the popular models to capture distributional similarity is "Word2Vec".
     Target word: dog, Context word: ['fox', 'jumps', 'over', 'the', 'lazy', '<pad>', '<pad>', '<pad>', '<pad>', '<pad>']
 
     ```
+    Or some of the implementations include the x_train vector to have for every word in context, the x_train will have the target word repeated.  
+    ```
+    # soething like this: 
+    Target word: the, Context word: quick
+    Target word: the, Context word: brown
+    Target word: the, Context word: fox
+    Target word: the, Context word: jumps
+    Target word: the, Context word: over
+    Target word: quick, Context word: the
+    Target word: quick, Context word: brown
+    Target word: quick, Context word: fox
+    Target word: quick, Context word: jumps
+    Target word: quick, Context word: over
+    Target word: quick, Context word: the
+    Target word: brown, Context word: the
+    Target word: brown, Context word: quick
+    Target word: brown, Context word: fox
+    Target word: brown, Context word: jumps
+    Target word: brown, Context word: over
+    Target word: brown, Context word: the
+    Target word: brown, Context word: lazy
+    ```
     
   
   
