@@ -203,7 +203,23 @@ One of the popular models to capture distributional similarity is "Word2Vec".
     Target word: brown, Context word: over
     Target word: brown, Context word: the
     Target word: brown, Context word: lazy
+    ```  
+
+    There are pre-trained word embeddings like Word2Vec and Doc2vec implemented in gensim.
+
+    ```python
+    from gensim.models import Word2Vec
+    from gensim.test.utils import common_texts
+
+    word2vec_model = Word2Vec(common_texts, size = 10, window =5, min_count =1, workers =4)
+    print(word2vec_model.wv['like']) # This will print the vector representation of word "like" 
+    print(word2vec_mode.wv.most_similar('computer', topn =6) # this will print top 6 most similar words to computer
     ```
+
+    * One of the challenges every method discussed faces is OOV. One way is to remove all the OOV that are not in the corpus vocabulary or the fastText from Facebook takes care of words by their morphological representations, for example, the word "gregarious", is converted to n-grams representation of "gre", "ega"... etc,
+    * we can use a pre-trained version of fasttext or train our data on fasttext using gensim. 
+    
+    
     
   
   
