@@ -217,7 +217,7 @@ One of the popular models to capture distributional similarity is "Word2Vec".
     ```
 
     * One of the challenges every method discussed faces is OOV. One way is to remove all the OOV that are not in the corpus vocabulary or the fastText from Facebook takes care of words by their morphological representations, for example, the word "gregarious", is converted to n-grams representation of "gre", "ega"... etc,
-    * we can use a pre-trained version of fasttext or train our data on fasttext using gensim. 
+    * we can use a pre-trained version of [fasttext](https://radimrehurek.com/gensim/auto_examples/tutorials/run_fasttext.html#sphx-glr-auto-examples-tutorials-run-fasttext-py) or train our data on fasttext using gensim. 
     
     
     
