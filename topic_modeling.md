@@ -13,11 +13,11 @@ Working:
   * update step: topic-to-text assignment(topic distribution in the collection of documents), word-to-topic assignment(word distribution for each topic).
 
 
-1. Imagine a word cloud that has a certain topic assigned to the could and words in the could are differentiated by their font size which represents the relative 
+1. Imagine a word cloud that has a certain topic assigned to the cloud and words in the cloud are differentiated by their font size which represents the relative 
 weight or contribution of each word to each topic.
 2. LDA treats each document as a mixture of topics.
 3. The LDA's default assumption is that the words in the document are not randomly aligned, but they are related. that is the the words are generated and put together that resembles the abstract topics.
 4. Our goal is to reverse engineer this document generation process to detect which topics are responsible for the observed words.
 
-* As discussed above, the update step have two main steps:
+* As discussed above, the update step has two main steps:
   * 
