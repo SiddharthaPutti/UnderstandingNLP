@@ -45,7 +45,14 @@ lda_model = gensim.models.ldamodel.LdaModel(corpus = corpus, # [[(0,1), (1,3), (
                                             random_state = 100,
                                             update_every = 1, # how often it should update topic distribution. 
                                             chunksize = 1000, number of docs to iterate as a chunk, this determines the memory usage training speed.
-                                            passes = 10) # number of iterations. 
+                                            passes = 10) # number of iterations.
+
+# interactive viz
+
+import pyLDAvis.gensim
+pyLDAviz.enable_notebook()
+vis = pyLDAvis.gensim.prepare(lda_model, corpus, dictionary = lda_model.id2word)
+vis
 
 ```
 
