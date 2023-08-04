@@ -19,5 +19,33 @@ weight or contribution of each word to each topic.
 3. The LDA's default assumption is that the words in the document are not randomly aligned, but they are related. that is the the words are generated and put together that resembles the abstract topics.
 4. Our goal is to reverse engineer this document generation process to detect which topics are responsible for the observed words.
 
-* As discussed above, the update step has two main steps:  
-  * 
+* Short description:  
+  * RANDOM ALLOCATION: randomly assign words to topics in a doc.  
+  * INITIAL ESTIMATION: estimate topic and word distributions based on step1.  
+  * REALLOCATION: evaluate using dist from step2 and reallocate words to respective topics.
+  * RE-ESTIMATION: re-estimate dist based on reallocations from step3.
+  * ITERATION: iterate step3 and 4 until the new estimation is the same as prev estimation or, until a certain number of iterations. 
+
+Topic prob dist P( topic t / document d ) = (No 0f words in d allocated to t) / (total no of words in d)  
+Word prob dist P( word w / topic t ) = (No of times w allocated to t in all d's) / (total no of occurrences of w)  
+
+Update step: let's assume we have two topics, for a random given word "w"  
+* Pupdate(w from t1) = Pprev(t1 / d1) * P(w/t1)  
+* Pupdate(w from t2) = Prev(t2 / d1) * P(w/t2)  
+
+If Pupdate(w from t1) > Pupdate(w from t2) assign the word to t1, else otherwise.  
+After this step some of the allocations are changed, now you need to reestimate the topic prob. After multiple passes through the whole documents, this will reach to a stable distribution.  
+
+```python
+# the LDA model is available in gensim
+import gensim
+lda_model = gensim.models.ldamodel.LdaModel(corpus = corpus, # [[(0,1), (1,3), (2,6), .....], [....]] array of tuples, where tuple (index, occurrences)
+                                            id2word = id2word, # each word is mapped to unique id, a dict 
+                                            num_topics = 2, # no of topics to allocate 
+                                            random_state = 100,
+                                            update_every = 1, # how often it should update topic distribution. 
+                                            chunksize = 1000,
+                                            passes = 10)
+
+```
+
