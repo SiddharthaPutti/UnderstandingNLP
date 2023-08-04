@@ -19,5 +19,5 @@ weight or contribution of each word to each topic.
 3. The LDA's default assumption is that the words in the document are not randomly aligned, but they are related. that is the the words are generated and put together that resembles the abstract topics.
 4. Our goal is to reverse engineer this document generation process to detect which topics are responsible for the observed words.
 
-* As discussed above, the update step has two main steps:
+* As discussed above, the update step has two main steps:  
   * 
