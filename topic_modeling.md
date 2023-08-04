@@ -44,8 +44,8 @@ lda_model = gensim.models.ldamodel.LdaModel(corpus = corpus, # [[(0,1), (1,3), (
                                             num_topics = 2, # no of topics to allocate 
                                             random_state = 100,
                                             update_every = 1, # how often it should update topic distribution. 
-                                            chunksize = 1000,
-                                            passes = 10)
+                                            chunksize = 1000, number of docs to iterate as a chunk, this determines the memory usage training speed.
+                                            passes = 10) # number of iterations. 
 
 ```
 
