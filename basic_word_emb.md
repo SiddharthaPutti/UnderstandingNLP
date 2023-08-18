@@ -1,8 +1,8 @@
-# 60DaysofNLP
+
 This repository will be my record of the NLP journey.
 
 All this is going to be in lame/understandable language. 
-Day 1: 
+ 
 
 I know that, once the data is all preprocessed, the representation needs to be in numbers, not text anymore. so the text/tokens we have needs to be vectorized(vector/numbers format). 
 
