@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Embedding | Sid&#39;IO</title>
+<meta name="keywords" content="nlp, language-model, alignment, steerability, prompting" />
+<meta name="description" content="All this is going to be in lame/understandable language.">
+<meta name="author" content="Lilian Weng">
+<link rel="canonical" href="https://siddharthaputti.github.io//posts/word_embedding/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.67a6fb6e33089cb29e856bcc95d7aa39f70049a42b123105531265a0d9f1258b.css" integrity="sha256-Z6b7bjMInLKehWvMldeqOfcASaQrEjEFUxJloNnxJYs=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://lilianweng.github.io/favicon_peach.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://lilianweng.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://lilianweng.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://lilianweng.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://lilianweng.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HFT45VFBX6"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-HFT45VFBX6', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Basic Word Embedding" />
+<meta property="og:description" content="All this is going to be in lame/understandable language." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://siddharthaputti.github.io//posts/word_embedding/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-03-15T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-03-15T00:00:00&#43;00:00" />
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://siddharthaputti.github.io//posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Word Embedding",
+      "item": "https://siddharthaputti.github.io//posts/word_embedding/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Basic Word Embedding",
+  "name": "Word Embedding",
+  "description": "All this is going to be in lame/understandable language.",
+  "keywords": [
+    "nlp", "language-model", "alignment", "steerability", "prompting"
+  ],
+  "articleBody": "",
+   "wordCount" : "4428",
+  "inLanguage": "en",
+  "datePublished": "2023-03-15T00:00:00Z",
+  "dateModified": "2023-03-15T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Siddhartha Putti"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://siddharthaputti.github.io//posts/word_embedding/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sid'IO",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://lilianweng.github.io/favicon_peach.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$','$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+
+  window.addEventListener('load', (event) => {
+      document.querySelectorAll("mjx-container").forEach(function(x){
+        x.parentElement.classList += 'has-jax'})
+    });
+
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://siddharthaputti.github.io/" accesskey="h" title="Sid&#39;IO (Alt + H)">Sid&#39;IO</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://siddharthaputti.github.io/posts" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://siddharthaputti.github.io/faq" title="FAQ">
+                    <span>FAQ</span>
+                </a>
+            </li>
+           
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Basic Word Embedding
+    </h1>
+    <div class="post-meta"><span title='2023-03-15 00:00:00 +0000 UTC'>March 15, 2023</span>&nbsp;·&nbsp;21 min&nbsp;·&nbsp; Siddhartha Putti
+
+  <div class="post-content"><p><strong>Word embedding</strong>, also known as <strong>In-Context Prompting</strong>, refers to methods for how to communicate with LLM to steer its behavior for desired outcomes <em>without</em> updating the model weights. It is an empirical science and the effect of prompt engineering methods can vary a lot among models, thus requiring heavy experimentation and heuristics.</p>
+<p>I know that, once the data is all preprocessed, the representation needs to be in numbers, not text anymore. so the text/tokens we have needs to be vectorized(vector/numbers format).</p>
+<p>There are many ways of representing text/tokens to vectors. some of them are:</p>
+<ol>
+    <li><p>One-Hot Encoding.</p></li>
+    <li><p>Bag of Words.</p></li>
+    <li><p>N-Grams.</p></li>
+    <li><p>TF-IDF.</p></li>
+    <li><p>Distributed Representations: Word Embeddings.</p></li>
+</ol>
+<h2 id="One-Hot Encoding:">One-Hot Encoding:<a hidden class="anchor" aria-hidden="true" href="#One-Hot Encoding">#</a></h1>
+<ul>
+    <li><p>In One Hot encoding each word in the corpus is given a unique number/index. we simply put 1, 0 if the word is present in each document.</p></li>
+    <li><p>which makes it a large sparse representation.</p></li>
+    <li><p>The size of the vector is directly proportional to the size of the vocab.</p></li>
+    <li><p>There is no relationship captured between the words.</p></li>
+</ul>
+<h2 id="Bag Of Words:t">Bag Of Words:<a hidden class="anchor" aria-hidden="true" href="#Bag Of Words:">#</a></h2>
+<ul>
+    <li><p>Dont get confused by the name(BoW). This method is generally used in text classification problems although it has its cons. let's see how it works in the first place.
+    </p></li>
+    <li><p>Instead of 0, 1 as One-Hot Encoding does, replace it with the number of times the word is seen in the particular document.</p></li>
+    <li><p>now imagine that there are two documents, [2,4,0,3,2,1] and [2,3,1,4,4,1]. calculate the distance between both documents, which will be a lower value. that represents both documents might be similar.</p></li>
+    <li><p>same as before, we have a large sparse vector, as the vocab increases.
+    </p>It doesn't capture similarity/relationship b/n different words. "I run", "I ran", and "I ate" All three vectors will be equally apart.</li>
+    <li><p>No capturing of OOV. (out of vocab)</p></li>
+    <li><p>No sequence info- word order information is lost.</p></li>
+    <li><p><pre tabindex="0"><code> from sklearn.feature_extraction.text import CountVectorizer  
+        </code></pre></p></li>
+</ul>
+
+<h2 id="N-Grams:">N-Grams:<a hidden class="anchor" aria-hidden="true" href="#N-Grams">#</a></h1>
+<ul>
+    <li><p>All of the above methods have words as independent units, that is no word order. To capture some context, we basically take N words at a time to calculate the count.</p></li>
+    <li><p>if N=2, "The dog bit me", this document is going to be all the combination of words with length 2.</p></li>
+    <li><p>By increasing the value of N, we can incorporate a larger context, however, it further increases the sparsity of the vector.</p></li>
+    <li><p>It captures some context and word-order information, unlike BoW.</p></li>
+    <li><p>Thus resulting vector captures some semantic similarity/relationship.</p></li>
+    <li><p>This still doesn't address the OOV problem.</p></li>
+</ul>
+<h2 id="TF-IDF:">TF-IDF:<a hidden class="anchor" aria-hidden="true" href="#TF-IDF:">#</a></h1>
+<ul>
+    <li><p>All the above methods treat all the words equally, let's give some bias to the most important words/token from the documents.</p></li>
+    <li><p>Let's aim to give some importance to a particular word with respect to other words in the document, and also in the corpus.</p></li>
+    <li><p>If a word appears in a document very often than in the other documents, then the word must be very important to that document.</p></li>
+    <li><p>Also the importance must be increased in proportion to its frequency. given that its importance must be decreased in proportion to the word frequencies in other documents.</p></li>
+    <li><p>Term-Freq: how often a word is seen in a document.</p><ul>
+        <li><p>
+            tf = (no of occurrence of the word in doc) / (total no of terms in doc)
+        </p></li>
+    </ul></li>
+    <li><p>Inv-Doc Freq: measures the importance of words across the corpus.</p><ul>
+        <li><p>
+            IDF = (total no of docs) / (no of docs with that word in them)
+        </p></li>
+    </ul></li>
+    <li><p>Now tf*idf</p></li>
+    <li><p>used in text classification and information retrieval.</p></li>
+    <li><p>We can use tf-idf to calculate similarity b/n docs using Euclidean/cosine.</p></li>
+    <li><p>same as previous methods, large sparse vectors.</p></li>
+    <li><p>Still can not address OOV.</p></li>
+    <li><p><pre tabindex="0"><code>  from sklearn.feature_extraction.text import TfidfVectorizer
+    </code></pre></p></li>
+</ul>
+
+<h2 id="Distributed Representations: Word Embeddings">Distributed Representations: Word Embeddings<a hidden class="anchor" aria-hidden="true" href="#word_embd">#</a></h1>
+<p>These are NN-based methods for dense(low dimensional) representations of words.
+    given the word USA, it must be similar to Canada, China, etc... this is usually called distributional similarity. these can be considered distributionally similar.</p>
+<p>One of the popular models to capture distributional similarity is "Word2Vec".</p>    
+<ul>
+    <li><p>This works well to capture analogies like King- Man+Woman~ Queen.</p></li>
+    <li><p>This representation is also called Embedding. This ensures the vector is dense(very less sparse- less 0's)</p></li>
+    <li><p>If two different words occur in a similar context, then it's highly likely that the meanings of the words are also similar.</p></li>
+    <li><p>Some of the other pre-trained Embeddings are GloVe by Stanford, fasttext by Facebook...</p></li>
+    <li><p>fortunately, embeddings like word2vec have already pre-trained versions. you can load the pre-trained versions of word2vec and get the embeddings of words in your required length.</p></li>
+
+</ul>
+
+<p>You can also train your own word embeddings, for this there are two main proposed architectures:</p>
+<ul>
+    <li><p>CBOW - continuous bag of words</p></li>
+    <ol>
+    <li><p>This is like filling the blanks kind of learning: the model tries to predict the center word given the rest of the context. In this method, the model tries to assign probabilities in such a way that the context makes sense.</p></li>
+    <li><p>It takes every word in the corpus as the target and assigns prob to every word with respect to a given context.</p></li>
+    <li><p>Input:</p>
+    <ul>
+        <li><p>take a fixed window size for example 10, that is 20 words at a time from a document. 10 before and 10 after the center word</p></li>
+        <li><p>Create a one-hot(or indexed) representation of each word, the matrix for a window size of 10 will now be: (window_size *2, vocab_size) {except the center word}</p></li>
+        <li><p>slide the window for the next 20 words, that is slide for one word at a time, this will again create a matrix of size: (window_size *2, vocab_size)</p></li>
+        <li><p>continue this process until the end of the document, pad the document if necessary to include all the context. this will create a number of matrices, concatenate them all to make it a large sparse matrix, and serve as input to NN.</p></li>
+        <li><p>if you are using embeddings like word2vec, the process is similar, but the size of the matrix changes to (window_size*2, embedding_dim), that is each word will have a fixed embedding length.</p></li>
+        <li><p>Output will be (the_no_of_concatenated_windows, vocab), for each window predict the prob distribution of the entire vocab and select the highest prob word.</p></li>
+    </ul>
+    </li>
+    </ol>
+    <li><p><pre tabindex="0"><code>  
+        # vocabulary 
+        vocab = set(raw_text) 
+
+        # converting words to indexes and indexes to words, just creating of dictionary to map them
+        word_to_index = {word:index for index, word in enumerate(vocab)}
+        index_to_word = {index:word for index, word in enumerate(vocab)}
+
+        def create_context(context, word_to_index):
+            ids = [word_to_index[w] for w in context]
+            return ids
+
+        # appending to data, creating inputs 
+        data = []
+        for i in range(window_size, len(raw_text) -window_size):
+            context = raw_text[i-window_size: i] + raw_text[i+1: raw_text[i+window_size+1]
+            target = raw_text[i]
+            data.append((context,target))
+                
+        # for each epoch run the following in training loop 
+        for context, target in data: 
+            context_vector = create_context(context, word_to_index)
+            log_pob = model(context_vector)
+            loss = #
+    </code></pre></p></li>
+
+</ul>
+
+<p>now that you have trained a CBOW model, the word embeddings are the weights of the hidden layer. the first row of the hidden layer representation is the word embeddings for the 0th word. the hidden layer dims (vocab_size, embedding_dim)</p>
+
+<h2 id="SkipGram: ">SkipGram: <a hidden class="anchor" aria-hidden="true" href="#SkipGram:">#</a></h2>
+<p>given the center word predict the context words</p>
+<ul>
+<li><p>we run a sliding window of size 2k+1, k words before the center word and k words after the center word, +1 for the center word.</p></li>
+<li><p>Similar to the CBOW, the word embeddings are weights of the hidden layer.</p></li>
+
+<li><p><pre tabindex="0"><code>  
+    import numpy as np
+
+    sentence = "The quick brown fox jumps over the lazy dog"
+    window_size = 5
+    words = sentence.lower().split()
+    words = ['<pad>'] * window_size + words + ['<pad>']* window_size
+
+    vocab = sorted(set(words))
+
+    word2idx = {word: idx for idx, word in enumerate(vocab)}
+
+    idx2word = {idx: word for word, idx in word2idx.items()}
+
+    X_train = [] 
+    y_train = [] 
+
+    for i in range(window_size, len(words)-window_size):
+        target_word = words[i]
+        target_idx = word2idx[target_word]
+
+        context_words = []
+        for j in range(i - window_size, i + window_size + 1):
+            if j != i and 0 <= j < len(words):
+                context_word = words[j]
+                context_idx = word2idx[context_word]
+                context_words.append(context_idx)
+
+        X_train.append(target_idx)
+        y_train.append(context_words)
+
+    X_train = np.array(X_train)
+    y_train = np.array(y_train)
+
+    for i in range(len(X_train)):
+        target_word = idx2word[X_train[i]]
+        context_word = [idx2word[word] for word in y_train[i]]
+        print(f"Target word: {target_word}, Context word: {context_word}")
+
+</code></pre></p></li>
+
+<li><p><pre tabindex="0"><code>  
+    # the output for this code is: 
+    X_train: array([8, 7, 1, 3, 4, 6, 8, 5, 2])
+    y_train: array([[0, 0, 0, 0, 0, 7, 1, 3, 4, 6],
+                [0, 0, 0, 0, 8, 1, 3, 4, 6, 8],
+                [0, 0, 0, 8, 7, 3, 4, 6, 8, 5],
+                [0, 0, 8, 7, 1, 4, 6, 8, 5, 2],
+                [0, 8, 7, 1, 3, 6, 8, 5, 2, 0],
+                [8, 7, 1, 3, 4, 8, 5, 2, 0, 0],
+                [7, 1, 3, 4, 6, 5, 2, 0, 0, 0],
+                [1, 3, 4, 6, 8, 2, 0, 0, 0, 0],
+                [3, 4, 6, 8, 5, 0, 0, 0, 0, 0]])
+
+
+    Target word: the, Context word: ['<pad>', '<pad>', '<pad>', '<pad>', '<pad>', 'quick', 'brown', 'fox', 'jumps', 'over']
+    Target word: quick, Context word: ['<pad>', '<pad>', '<pad>', '<pad>', 'the', 'brown', 'fox', 'jumps', 'over', 'the']
+    Target word: brown, Context word: ['<pad>', '<pad>', '<pad>', 'the', 'quick', 'fox', 'jumps', 'over', 'the', 'lazy']
+    Target word: fox, Context word: ['<pad>', '<pad>', 'the', 'quick', 'brown', 'jumps', 'over', 'the', 'lazy', 'dog']
+    Target word: jumps, Context word: ['<pad>', 'the', 'quick', 'brown', 'fox', 'over', 'the', 'lazy', 'dog', '<pad>']
+    Target word: over, Context word: ['the', 'quick', 'brown', 'fox', 'jumps', 'the', 'lazy', 'dog', '<pad>', '<pad>']
+    Target word: the, Context word: ['quick', 'brown', 'fox', 'jumps', 'over', 'lazy', 'dog', '<pad>', '<pad>', '<pad>']
+    Target word: lazy, Context word: ['brown', 'fox', 'jumps', 'over', 'the', 'dog', '<pad>', '<pad>', '<pad>', '<pad>']
+    Target word: dog, Context word: ['fox', 'jumps', 'over', 'the', 'lazy', '<pad>', '<pad>', '<pad>', '<pad>', '<pad>']
+
+
+</code></pre></p></li>
+<li><p>Or some of the implementations include the x_train vector to have for every word in context, the x_train will have the target word repeated.</p></li>
+
+<li><p><pre tabindex="0"><code>  
+    # soething like this: 
+    Target word: the, Context word: quick
+    Target word: the, Context word: brown
+    Target word: the, Context word: fox
+    Target word: the, Context word: jumps
+    Target word: the, Context word: over
+    Target word: quick, Context word: the
+    Target word: quick, Context word: brown
+    Target word: quick, Context word: fox
+    Target word: quick, Context word: jumps
+    Target word: quick, Context word: over
+    Target word: quick, Context word: the
+    Target word: brown, Context word: the
+    Target word: brown, Context word: quick
+    Target word: brown, Context word: fox
+    Target word: brown, Context word: jumps
+    Target word: brown, Context word: over
+    Target word: brown, Context word: the
+    Target word: brown, Context word: lazy
+
+</code></pre></p></li>
+<li><p>There are pre-trained word embeddings like Word2Vec and Doc2vec implemented in gensim.</p></li>
+<li><p><pre tabindex="0"><code>  
+    from gensim.models import Word2Vec
+    from gensim.test.utils import common_texts
+
+    word2vec_model = Word2Vec(common_texts, size = 10, window =5, min_count =1, workers =4)
+    print(word2vec_model.wv['like']) # This will print the vector representation of word "like" 
+    print(word2vec_mode.wv.most_similar('computer', topn =6)) # this will print top 6 most similar words to computer
+
+</code></pre></p></li>
+<li><p>One of the challenges every method discussed faces is OOV. One way is to remove all the OOV that are not in the corpus vocabulary or the fastText from Facebook takes care of words by their morphological representations, for example, the word "gregarious", is converted to n-grams representation of "gre", "ega"... etc,</p></li>
+<li><p>we can use a pre-trained version of fasttext or train our data on <a href = "https://radimrehurek.com/gensim/auto_examples/tutorials/run_fasttext.html#sphx-glr-auto-examples-tutorials-run-fasttext-py">fasttext</a> using gensim.</p></li>
+
+</ul>
+<p>look at this amazing log by Lilian Weng on <a href = "https://lilianweng.github.io/posts/2017-10-15-word-embedding/">embedding</a>, I found this on 8/21/2023.</p>
+
+
+
+  <footer class="post-footer">
+
+<nav class="paginav">
+  <a class="prev" href="https://lilianweng.github.io/posts/2023-06-23-agent/">
+    <span class="title">« </span>
+    <br>
+    <span>LLM Powered Autonomous Agents</span>
+  </a>
+  <a class="next" href="https://lilianweng.github.io/posts/2023-01-27-the-transformer-family-v2/">
+    <span class="title"> »</span>
+    <br>
+    <span>The Transformer Family Version 2.0</span>
+  </a>
+</nav>
+
+
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://siddharthaputti.github.io/">Lil&#39;Log</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = 'copy';
+
+        function copyingDone() {
+            copybutton.innerText = 'copied!';
+            setTimeout(() => {
+                copybutton.innerText = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
