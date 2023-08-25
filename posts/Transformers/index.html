@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Topinc Modeling | Sid&#39;IO</title>
+<title>Transformers? | Sid&#39;IO</title>
 <meta name="keywords" content="nlp, language-model, alignment, steerability, prompting" />
 <meta name="description" content="All this is going to be in lame/understandable language.">
 <meta name="author" content="Siddhartha Putti">
-<link rel="canonical" href="https://siddharthaputti.github.io//posts/topic_modeling/" />
+<link rel="canonical" href="https://siddharthaputti.github.io//posts/transformers/" />
 <link crossorigin="anonymous" href="/assets/css/stylesheet.min.67a6fb6e33089cb29e856bcc95d7aa39f70049a42b123105531265a0d9f1258b.css" integrity="sha256-Z6b7bjMInLKehWvMldeqOfcASaQrEjEFUxJloNnxJYs=" rel="preload stylesheet" as="style">
 <script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
     onload="hljs.initHighlightingOnLoad();"></script>
@@ -67,10 +67,10 @@ if (!doNotTrack) {
 	gtag('config', 'G-HFT45VFBX6', { 'anonymize_ip': false });
 }
 </script>
-<meta property="og:title" content="Topic Modeling" />
+<meta property="og:title" content="Transformers?" />
 <meta property="og:description" content="All this is going to be in lame/understandable language." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://siddharthaputti.github.io//posts/topic_modeling/" /><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://siddharthaputti.github.io//posts/transformers/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2023-03-15T00:00:00&#43;00:00" />
 <meta property="article:modified_time" content="2023-03-15T00:00:00&#43;00:00" />
 
@@ -90,7 +90,7 @@ if (!doNotTrack) {
       "@type": "ListItem",
       "position":  2 ,
       "name": "Word Embedding",
-      "item": "https://siddharthaputti.github.io//posts/topic_modeling/"
+      "item": "https://siddharthaputti.github.io//posts/transformers/"
     }
   ]
 }
@@ -116,7 +116,7 @@ if (!doNotTrack) {
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "https://siddharthaputti.github.io//posts/topic_modeling/"
+    "@id": "https://siddharthaputti.github.io//posts/transformers/"
   },
   "publisher": {
     "@type": "Organization",
@@ -209,80 +209,82 @@ if (!doNotTrack) {
   <header class="post-header">
     
     <h1 class="post-title">
-      Topic Modeling
+      Transformers
     </h1>
-    <div class="post-meta"><span title='2023-03-15 00:00:00 +0000 UTC'>Feb 14, 2023</span>&nbsp;·&nbsp;21 min&nbsp;·&nbsp; Siddhartha Putti
+    <div class="post-meta"><span title='2023-03-15 00:00:00 +0000 UTC'>Feb 20, 2023</span>&nbsp;·&nbsp;10 min&nbsp;·&nbsp; Siddhartha Putti
     </div>
-  <div class="post-content"><p><strong>THE CAPABILITIES OF LATENT DIRICHLET ALLOCATION</strong>, - LDA (not traditional linear discriminant analysis).</p>
-<p><strong>Analysis</strong> - means clustering methods, used when you don't have labels and want to find/discover new topics.</p>
-<p><strong>Modeling</strong> - like LDA, you don't have labels and you want to find new topics and learn about each text composition/distribution.</p>
-<p>For clustering methods, the document is assigned to only one topic, either A or B cluster if there are only two topics. what if the document belongs to both clusters? we take the text composition of the document and assign how much percentage of topic A and topic B is related to the document.</p>
-<h2 id="Assumptions and Understanding">Assumptions and Understanding<a hidden class="anchor" aria-hidden="true" href="#Assumptions_and_Understanding">#</a></h2>
-<ol>
-    <li><p>Imagine a word cloud that has a certain topic assigned to the cloud and words in the cloud are differentiated by their font size which represents the relative weight or contribution of each word to each topic.</p></li>
-    <li><p>LDA treats each document as a mixture of topics.</p></li>
-    <li><p>The LDA's default assumption is that the words in the document are not randomly aligned, but they are related. that is the the words are generated and put together that resembles the abstract topics.</p></li>
-    <li><p>Our goal is to reverse engineer this document generation process to detect which topics are responsible for the observed words.</p></li>
-</ol>
+  <div class="post-content"><p>we know that text is sequential data. Networks like LSTM contain feedback loops that allow information to propagate from one step to another. These types of architectures are mainly used for speech processing and time series. You can find more details in this amazing blog post by Andrej Karpathy: The Unreasonable Effectiveness of RNN.</p>
+<p>One of the main areas where RNN showed prominence is machine translation: changing text from one language to another. This type of machine translation model is built by using encoder-decoder architecture or seq-to-seq architectures(input and output are diff lengths).</p>
 
-<h2 id="Working">Working<a hidden class="anchor" aria-hidden="true" href="#Working">#</a></h2>
 <ol>
-    <li><p>It will start with some topic assignments to the text.</p></li>
-    <li><p>Learn about the word composition of each topic.</p></li>
-    <li><p>Reiterate until it reaches the most reliable solution.</p></li>
-    <ul><li><p><strong>Update Step:</strong>Topic-to-text assignment(topic distribution in the collection of documents), Word-to-topic assignment(word distribution for each topic).</p></li></ul>
+    <li><p>The encoder encodes the information into a numerical sequence which is generally called a hidden state,which is the output of encoder.</p></li>
+    <li><p>This state is passed to the decoder. and the decoder outputs the sequence one word at a time.</p></li>
+    <li><p>The main drawback of this kind of architecture:</p>
+    <ul>
+        <li><p>The hidden state creates an information bottleneck, which means it has to represent the entire meaning in a single hidden state.</p></li>
+    <li><p>If there is a long sequence, the information may be lost in encoding the whole sequence into a compressed format.</p></li>
+    <li><p>This could be overcome by providing all of the encoder state's information to the decoder. This is called "ATTENTION".</p></li></ul>
 </ol>
+<p>GPT: As the name says it is a pre-trained transformer for generating text.</p>
+<p>BERT: This is also called masked-language-modeling. The objective is to find the randomly masked words in a text.</p>
 
-<h2 id="Decoding Algorithm">Decoding Algorithm<a hidden class="anchor" aria-hidden="true" href="#Decoding_Algorithm">#</a></h2>
+<h2 id="ATTENTION">ATTENTION<a hidden class="anchor" aria-hidden="true" href="#ATTENTION">#</a></h2>
 <ul>
-    <li><p><strong>ALLOCATION:</strong> Randomly assign words to topics in a doc.</p></li>
-    <li><p><strong>INITIAL ESTIMATION:</strong> Estimate topic and word distributions based on step1.</p></li>
-    <li><p><strong>RE-ALLOCATION:</strong>  Evaluate using dist from step2 and reallocate words to respective topics.</p></li>
-    <li><p><strong>RE-ESTIMATION:</strong> Re-estimate distribution based on reallocations from step3.</p></li>
-    <li><p><strong>ITERATION:</strong> Iterate step3 and 4 until the new estimation is the same as prev estimation or, until a certain number of iterations.</p></li>
+    <li><p>The main idea is instead of producing a single hidden state, the encoder(BERT) makes a representation of all the hidden states at each step that the decoder(GPT) can access.</p></li>
+    <li><p>As you thought of it by now, representing all the hidden states makes it a large matrix for the decoder input, you need a mechanism to prioritize which states to expose to the decoder.</p></li>
+    <li><p>This is where attention is prominent, the decoder assigns weight to the states of the encoder at every decoding step.</p></li>
+    <li><p>Another shortcoming is, since the mechanism is sequential, we can not process this in parallel, The "SELF-ATTENTION" mechanism paved the way for parallel executions.</p></li>
+    <li><p>The basic idea is to operate attention on all states in the same layer of the neural network, and then fed into the feed-forward neural network. that is both encoder and decoder have self-attention mechanisms. this way it can be trained much faster than RNN models.</p></li>
+    <ul><li><p>As we do not have most of the resources to collect large amounts of datasets to create a model for machine translation, hugging face provides pre-trained models. that the weights of the entire architecture are provided, such that we can use the pre-trained version of the model on our available comparatively smaller dataset to fine-tune. this process is called "TRANSFER LEARNING".</p></li></ul>
 </ul>
 
-<p>Topic prob dist P( topic t / document d ) = (No 0f words in d allocated to t) / (total no of words in d)</p>
-<p>Word prob dist P( word w / topic t ) = (No of times w allocated to t in all d's) / (total no of occurrences of w)</p>
-<p>Update step: let's assume we have two topics, for a random given word "w"</p>
+<h2 id="Hugging Face">Hugging Face<a hidden class="anchor" aria-hidden="true" href="#Hugging_Face">#</a></h2>
 <ul>
-    <li><p>Pupdate(w from t1) = Pprev(t1 / d1) * P(w/t1)</p></li>
-    <li><p>Pupdate(w from t2) = Prev(t2 / d1) * P(w/t2)</p></li>
+    <li><p>pipelines: This pipeline() method from hugging face abstracts away all the steps need to convert raw text into set of predictions from a pre-trained/fine-tuned model.</p></li>
 </ul>
-<p>If Pupdate(w from t1) > Pupdate(w from t2) assign the word to t1, else otherwise.</p>
-<p>After this step some of the allocations are changed, now you need to reestimate the topic prob. After multiple passes through the whole documents, this will reach to a stable distribution.</p>
 <p><pre tabindex="0"><code>  
-    # the LDA model is available in gensim
-    import gensim
-    lda_model = gensim.models.ldamodel.LdaModel(corpus = corpus, # [[(0,1), (1,3), (2,6), .....], [....]] array of tuples, where tuple (index, occurrences)
-                                                id2word = id2word, # each word is mapped to unique id, a dict 
-                                                num_topics = 2, # no of topics to allocate 
-                                                random_state = 100,
-                                                update_every = 1, # how often it should update topic distribution. 
-                                                chunksize = 1000, number of docs to iterate as a chunk, this determines the memory usage training speed.
-                                                passes = 10) # number of iterations.
-
-    # interactive viz
-
-    import pyLDAvis.gensim
-    pyLDAviz.enable_notebook()
-    vis = pyLDAvis.gensim.prepare(lda_model, corpus, dictionary = lda_model.id2word)
+    import pandas as pd
+    from transformers import pipeline
+    classifier = pipeline('text-classification')
+    text = """ I really love that movie"""
+    pd.DataFrame(classifier(text))
+    
+    output: 	label	    score
+            0	POSITIVE	0.999877
+    
+</code></pre></p>
+<ul>
+    <li><p>In this the model is very confident that this is a positive sentiment. This demonstrates one of the common tasks to perform using hugging face pre-trained transformers. similarly, you can perform tasks such as: Named Entity Recognition, summarization, Question Answering, Translation, and text Generation.</p></li>
+</ul>
+<p><pre tabindex="0"><code>  
+    # NER
+    ner_tagger = pipeline("ner", aggregation_strategy="simple") 
+    # Q-A
+    reader = pipeline("question-answering")
+    outputs = reader(question=question, context=text)
+    # Translation english to german
+    translator = pipeline("translation_en_to_de",
+    model="Helsinki-NLP/opus-mt-en-de")
+    outputs = translator(text, clean_up_tokenization_spaces=True, min_length=100)
+    # text generation
+    generator = pipeline("text-generation")
+    outputs = generator(prompt, max_length=200)
     
 </code></pre></p>
 
   <footer class="post-footer">
 
 <nav class="paginav">
-  <a class="prev" href="/posts/word_embedding/">
+  <a class="prev" href="/posts/topic_modeling/">
     <span class="title">« </span>
     <br>
-    <span>Basic Word Embedding</span>
+    <span>Topic Modeling</span>
   </a>
-  <a class="next" href="/posts/transformers/">
+  <!-- <a class="next" href="https://siddharthaputti.github.io/posts/word_embedding/">
     <span class="title"> »</span>
     <br>
-    <span>Transformers?</span>
-  </a>
+    <span>Stay tuned!</span>
+  </a> -->
 </nav>
 
 
