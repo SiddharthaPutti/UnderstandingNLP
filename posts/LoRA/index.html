@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Low Rank Adapters | Sid&#39;IO</title>
+<title>Low-Rank Adapters | Sid&#39;IO</title>
 <meta name="keywords" content="nlp, language-model, alignment, steerability, prompting" />
 <meta name="description" content="All this is going to be in lame/understandable language.">
 <meta name="author" content="Siddhartha Putti">
@@ -212,18 +212,18 @@ if (!doNotTrack) {
   <header class="post-header">
     
     <h1 class="post-title">
-      Efficient fine tuning with lower data than required.
+      Efficient fine-tuning with lower data than required.
     </h1>
     <div class="post-meta"><span title='2023-03-15 00:00:00 +0000 UTC'>Dec 17, 2023</span>&nbsp;·&nbsp;20 min&nbsp;·&nbsp; Siddhartha Putti
     </div>
   <div class="post-content"><p><strong>NOT HAVE ENOUGH DATA TO FINE-TUNE LARGE MODELS?</strong>, - LoRA is the way.</p>
 <p><strong>LoRA</strong> - Low Rank Adaption.</p>
 <p><strong>QLoRA</strong> - Quantised Low Rank Adaption</p>
-<p>If you are not familiar with Rank of matrix, let's look at overview of what a Rank is and how it is defined.</p>
+<p>If you are not familiar with Rank of a matrix, let's look at the overview of what a Rank is and how it is defined.</p>
 <h2 id="Rank of a Matrix">Rank of a Matrix<a hidden class="anchor" aria-hidden="true" href="#Rank_of_a_Matrix">#</a></h2>
 <p>Rank can be defined in two different ways: </p>
 <ol>
-    <li><p>Rank is popularly defined as number of independent row or columns in a matrix. when I say rows or coumns, you consider rows if #of rows < #of columns else otherwise.</p></li>
+    <li><p>Rank is popularly defined as the number of independent rows or columns in a matrix. when I say rows or columns, you consider rows if #of rows < #of columns else otherwise.</p></li>
     <p>
         <div>
             For Example:
@@ -235,16 +235,16 @@ if (!doNotTrack) {
             \end{bmatrix}
             \]
           </div>
-          <p>Here row 1 and 2 are linearly independent where as row3 is linear combination of 1 and 2. specifically row3 = 3(row1) + 2(row2). So, rank of this matrix is 2.</p>
+          <p>Here rows 1 and 2 are linearly independent where as row3 is a linear combination of 1 and 2. specifically row3 = 3(row1) + 2(row2). So, rank of this matrix is 2.</p>
 
     </p>
     <li><p>Rank can also be said by, the number of non-zero row vectors in <strong>Row Echelon Matrix.</strong> </p></li>
     <p>Now what is Row Echelon Transformation for a matrix? I'll make it simple to understand...</p>
     <p>A matrix is in REF (Row Echelon Form) if:
         <ol>
-            <li><p>The first non zero element in each row is 1.</p></li>
-            <li><p>The following rows should have 1 to the right column of the previous row's 1. assume row zero have 1 in 0th column, row1 should start with 1 on 1st column.</p></li>
-            <li><p>The rows with all zeors must be after rows with non-zeros.</p></li>
+            <li><p>The first non-zero element in each row is 1.</p></li>
+            <li><p>The following rows should have 1 to the right column of the previous row's 1. Assume row zero have 1 in 0th column, row1 should start with 1 on 1st column.</p></li>
+            <li><p>The rows with all zeros must be after rows with non-zeros.</p></li>
         </ol>
         <div>
             For Example:
@@ -256,31 +256,31 @@ if (!doNotTrack) {
             \end{bmatrix}
             \]
           </div>
-          <p>This is example for transformed RFE. you can learn full transformation on <a href="https://stattrek.com/matrix-algebra/echelon-transform#MatrixA">this post.</a></p>
+          <p>This is an example of transformed RFE. you can learn full transformation on <a href="https://stattrek.com/matrix-algebra/echelon-transform#MatrixA">this post.</a></p>
     </p>
     <p>Low-Rank? if rank of a matrix is significantly lower than number of rows/columns in a matrix. what does this mean? there are significantly higher number of linearly dependent rows in a matrix which also 
-        means there is high correlation in data which also says not all rows contain independent data. This redundancy provides an opportunity to represent data more efficiently by capturing the important information with fewer rows/parameters.
+        means there is a high correlation in data which also says not all rows contain independent data. This redundancy provides an opportunity to represent data more efficiently by capturing the important information with fewer rows/parameters.
     </p>
-    <p>Well, what do you think that low rank matrix is used for and what is importance of low rank matrix? The charecteristic of having more number of redundant rows makes the matrix used for efficient matrix factorization
+    <p>Well, what do you think that low-rank matrix is used for and what is importance of low rank matrix? The charecteristic of having more number of redundant rows makes the matrix used for efficient matrix factorization
         (MF) problem. which means representing matrix in product of lower dimension matrices. A(mxn) = B(mxk) * C(kxn).    </p>
     <p>How does having more redundant rows makes it easy for MF? and MF can't be performed on full rank matrix?  Indeed you can perform MF on full-rank but If the rows of A are linearly dependent or redundant, 
         it implies that there is shared information among these rows. This shared information can be captured by the factorization process, leading to a more concise representation.
         As a result, the factorization task becomes more manageable because fewer unique patterns need to be represented by the factor matrices.</p>
 </ol>
 <p>Easy right? how is this all related to fine-tuning a large model?</p>
-<p>Before jumping into LoRA, let's see how fine-tuning is performed before LoRA got introduced.</p>
+<p>Before jumping into LoRA, let's see how fine-tuning was performed before LoRA was introduced.</p>
 <h2 id="Pre-birth of LoRA">Pre-birth of LoRA<a hidden class="anchor" aria-hidden="true" href="#Pre-birth_of_LoRA">#</a></h2>
 <p> There are many studies done over fine-tuning a large model for down-stream task. if you are wondering the terminology, let me explain. </p>
-<p> Assume there is very large model(assume ChatGPT) trained on much larger data which is hard for general audience like us can get hands on. Now that you have all the trained parameters from large model
-    how can you use the model parameters for a specific task(like classification{down-stream task} of documents instead of Q/A like chatGPT)? This is where fine-tuning is prominant. 
+<p> Assume there is a very large model(assume ChatGPT) trained on much larger data which is hard for general audience like us can get hands on. Now that you have all the trained parameters from large model
+    how can you use the model parameters for a specific task(like classification{down-stream task} of documents instead of Q/A like chatGPT)? This is where fine-tuning is prominent. 
 </p>
 <ol>
-    <li><p>Introduce Adapters into the model. Adapters are a fancy term used for extra Dense layers. for example Houlsby et al. (2019) places 2 extra dense layers after every Transformer Block.</p>
+    <li><p>Introduce Adapters into the model. Adapters are a fancy term used for extra Dense layers. for example, Houlsby et al. (2019) places 2 extra dense layers after every Transformer Block.</p>
       <ul><li>  <p>The idea is to put rest of the parameters constant without updating on back-prop and update only adapters. This makes sure the original knowledge of large model is preserved and 
-        additional knowledge from lower amout of data is learnt through Adapters. Pretty good idea right? 
+        additional knowledge from lower amount of data is learnt through Adapters. Pretty good idea right? 
     </p></li>
-    <li><p>But what is the issue in here? Though this way of learning is accepted theoritically, practically this involves a higher amout of latency into the model even if we have smaller dense dimension 
-        , as the dense layers needs to be processed sequentially and can not be parallelised. more specifically when on online tasks where batch-size is 1 and running on single GPU.
+    <li><p>But what is the issue in here? Though this way of learning is accepted theoretically, practically this involves a higher amout of latency into the model even if we have smaller dense dimension,
+         as the dense layers needs to be processed sequentially and can not be parallelised. more specifically when on online tasks where batch-size is 1 and running on single GPU.
     </p></li> 
 </ul> </li>
     <li><p>Direct optimization or prefix tuning.</p></li>
@@ -289,7 +289,7 @@ if (!doNotTrack) {
         prompt accuracy "complete the following phrase, The cat is located on the...." the response from the model might increase or decrease,  
         In other words, a small tweak might not necessarily result in a better model response. It could, in fact, make the performance worse or not improve at all. 
     </p></li>
-    <li><p>Prefix tuning cuts the input prompts and expects model to adapt to the rest of the un-available data. This makes model to put extra effort to adapt to the input sequence. 
+    <li><p>Prefix tuning cuts the input prompts and expects model to adapt to the rest of the un-available data. This makes model to put extra effort into adapting to the input sequence. 
         This reduction in available information may make tuning the prompt less effective compared to other methods.</p></li>
 </ul>
 </ol>
@@ -303,17 +303,17 @@ if (!doNotTrack) {
         \rho (W \cdot x + BA \cdot x)
         $$ 
     <li><p>If W is of shape (1000,512),assume B is of shape (1000, 25), A is of shape (25, 512). Now, instead of 512,000 parameters of W, we will have 25,000 + 12,800= 37,800 
-        parameters that are need to updated</p></li>
+        parameters that are needed to updated</p></li>
     <li><p>To be precise, you add BA.X in the forward pass and update only B,A on the back prop keeping W parameters constant.</p></li>
     <li><p>Here rank=25 is a tunable parameter, The lower the rank the higher the chance that model doesnt learn, and the higher the rank the more redundant info you are introducing.</p></li>
 </ul>
 
 
-<p>The whole point in this is, the matrix W have many unnecessary weigths that are not meaningful for our problem which are redundant. They doesnt add any information to the problem, they are just combination of other weights. 
+<p>The whole point in this is, the matrix W have many unnecessary weights that are not meaningful for our problem which are redundant. They doesnt add any information to the problem, they are just combination of other weights. 
     So we can actually train a much lower matrix with required weights. Hence we use low rank approximation.  
 </p>
 
-<p>Let's also look at the implimentation part of LoRA in tensorflow.</p>
+<p>Let's also look at the implementation part of LoRA in tensorflow.</p>
 <p><pre tabindex="0"><code>  
     import tensorflow as tf
     from tensorflow.keras import layers, models
