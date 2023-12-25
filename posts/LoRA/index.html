@@ -322,9 +322,9 @@ if (!doNotTrack) {
         def __init__(self, hidden_size_1=1000, hidden_size_2=2000):
             super(ExampleNN, self).__init__()
             self.flatten = layers.Flatten()
-            self.linear1 = layers.Dense(hidden_size_1, activation='relu')
-            self.linear2 = layers.Dense(hidden_size_2, activation='relu')
-            self.linear3 = layers.Dense(10)
+            self.linear1 = layers.Dense(hidden_size_1, activation='relu', name='linear1')
+            self.linear2 = layers.Dense(hidden_size_2, activation='relu', name='linear2')
+            self.linear3 = layers.Dense(10, name = 'linear3')
 
         def call(self, img):
             x = self.flatten(img)
@@ -354,96 +354,114 @@ if (!doNotTrack) {
 
 <p><pre tabindex="0"><code> 
 
+    import math
 
-import tensorflow as tf
-from tensorflow.keras import layers, models
 
-class LoRAParametrization(tf.Module):
-
-    """
-    LoRAParametrization: Linearly Transformed Parametrization for Neural Networks.
-
-    Args:
-    - features_in (int): Number of input features.
-    - features_out (int): Number of output features.
-    - rank (int): Rank of the LoRA parametrization.
-    - alpha (float): Scaling factor for LoRA.
-
-    """
-    def __init__(self, features_in, features_out, rank=1, alpha=1):
-        self.lora_A = tf.Variable(tf.zeros((rank, features_out)))
-        self.lora_B = tf.Variable(tf.zeros((features_in, rank)))
-        tf.random.normal(self.lora_A, mean=0, stddev=1)
-        self.scale = alpha / rank
-        self.enabled = True
-
-    def __call__(self, original_weights):
-
-        """
-        Apply LoRA parametrization to the original weights.
-
-        Args:
-        - original_weights (tf.Tensor): Original weights of the layer.
-
-        Returns:
-        - tf.Tensor: Updated weights after applying LoRA.
-
-        """
-
-        if self.enabled:
-            return original_weights + tf.matmul(self.lora_B, self.lora_A) * self.scale
-        else:
-            return original_weights
+    class LoraLayer(keras.layers.Layer):
+        def __init__(
+            self,
+            original_layer,
+            rank=8,
+            alpha=32,
+            trainable=False,
+            **kwargs,
+        ):
+            # We want to keep the name of this layer the same as the original
+            # dense layer.
+            original_layer_config = original_layer.get_config()
+            name = original_layer_config["name"]
+    
+            kwargs.pop("name", None)
+    
+            super().__init__(name=name, trainable=trainable, **kwargs)
+    
+            self.rank = rank
+            self.alpha = alpha
+    
+            self._scale = alpha / rank
+    
+            self._num_heads = original_layer_config["output_shape"][-2]
+            self._hidden_dim = self._num_heads * original_layer_config["output_shape"][-1]
+    
+            self.original_layer = original_layer
+            # this layer should be frozen.
+            self.original_layer.trainable = False
+    
+            # LoRA dense layers.
+            self.A = keras.layers.Dense(
+                units=rank,
+                use_bias=False,
+                # Note: the original paper mentions that normal distribution was
+                # used for initialization. However, the official LoRA implementation
+                # uses "Kaiming/He Initialization".
+                kernel_initializer=keras.initializers.VarianceScaling(
+                    scale=math.sqrt(5), mode="fan_in", distribution="uniform"
+                ),
+                trainable=trainable,
+                name=f"lora_A",
+            )
+            # B has the same `equation` and `output_shape` as the original layer.
+            # `equation = abc,cde->abde`, where `a`: batch size, `b`: sequence
+            # length, `c`: `hidden_dim`, `d`: `num_heads`,
+            # `e`: `hidden_dim//num_heads`. The only difference is that in layer `B`,
+            # `c` represents `rank`.
+            self.B = keras.layers.EinsumDense(
+                equation=original_layer_config["equation"],
+                output_shape=original_layer_config["output_shape"],
+                kernel_initializer="zeros",
+                trainable=trainable,
+                name=f"lora_B",
+            )
+    
+        def call(self, inputs):
+            original_output = self.original_layer(inputs)
+            if self.trainable:
+                # If we are fine-tuning the model, we will add LoRA layers' output
+                # to the original layer's output.
+                lora_output = self.B(self.A(inputs)) * self._scale
+                return original_output + lora_output
+    
+            # If we are in inference mode, we "merge" the LoRA layers' weights into
+            # the original layer's weights - more on this in the text generation
+            # section!
+            return original_output
 </code></pre></p>
 
 <p>for each layer introduce the parametrization with LoRA. and define enabling or disabling LoRA to each layer. </p>
-
 <p><pre tabindex="0"><code> 
-class LinearLayerParametrization(tf.Module):
-    def __init__(self, layer, rank=1, lora_alpha=1):
-        features_in, features_out = layer.weights[0].shape
-        self.lora = LoRAParametrization(features_in, features_out, rank=rank, alpha=lora_alpha)
+    for layer_idx in range(net.backbone.num_layers):
+        layer = lora_model.backbone.get_layer(f"linear{layer_idx}")
+        # Allow mutation to Keras layer state.
+        layer._tracker.locked = False
 
-def linear_layer_parameterization(layer, rank=1, lora_alpha=1):
-    """
-    Create a parametrization for a linear layer using LoRA.
+        # Change query dense layer.
+        layer = LoraLayer(
+            self_attention_layer._query_dense,
+            rank=RANK,
+            alpha=ALPHA,
+            trainable=True,
+        )
 
-    Args:
-    - layer (tf.keras.layers.Layer): Linear layer to be parametrized.
-    - rank (int): Rank of the LoRA parametrization.
-    - lora_alpha (float): Scaling factor for LoRA.
-
-    Returns:
-    - LinearLayerParametrization: Parametrization for the linear layer.
-
-    """
-
-
-    return LinearLayerParametrization(layer, rank=rank, lora_alpha=lora_alpha)
-
-# Assuming 'net' is an instance of ExampleNN
-net = ExampleNN()
-
-# Create LoRA parametrizations for linear layers
-net.linear1.parametrizations.append(linear_layer_parameterization(net.linear1))
-net.linear2.parametrizations.append(linear_layer_parameterization(net.linear2))
-net.linear3.parametrizations.append(linear_layer_parameterization(net.linear3))
-
-def enable_disable_lora(enabled=True):
-    for layer in [net.linear1, net.linear2, net.linear3]:
-        layer.parametrizations[0].lora.enabled = enabled
-
-    </code></pre></p>
-
+        # Change value dense layer.
+        layer = LoraLayer(
+            self_attention_layer._value_dense,
+            rank=RANK,
+            alpha=ALPHA,
+            trainable=True,
+    )
+</code></pre></p>
 <p>Freeze all the parameters of the original network and only fine tuning the ones introduced by LoRA. Then fine-tune the model on new data.</p>
 
     <p><pre tabindex="0"><code> 
 # Freeze the non-LoRA parameters
-for layer in net.layers:
-    for var in layer.trainable_variables:
-        if 'lora' not in var.name:
-            print(f'Freezing non-LoRA parameter {var.name}')
-            var.trainable = False
+for layer in net._flatten_layers():
+    lst_of_sublayers = list(layer._flatten_layers())
+
+    if len(lst_of_sublayers) == 1:  # "leaves of the model"
+        if layer.name in ["lora_A", "lora_B"]:
+            layer.trainable = True
+        else:
+            layer.trainable = False
 
     </code></pre></p>
   <footer class="post-footer">
