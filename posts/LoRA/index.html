@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Low Rank Adapters | Sid&#39;IO</title>
+<meta name="keywords" content="nlp, language-model, alignment, steerability, prompting" />
+<meta name="description" content="All this is going to be in lame/understandable language.">
+<meta name="author" content="Siddhartha Putti">
+<link rel="canonical" href="https://siddharthaputti.github.io//posts/LoRA/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.67a6fb6e33089cb29e856bcc95d7aa39f70049a42b123105531265a0d9f1258b.css" integrity="sha256-Z6b7bjMInLKehWvMldeqOfcASaQrEjEFUxJloNnxJYs=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://siddharthaputti.github.io/doge.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://siddharthaputti.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://siddharthaputti.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://siddharthaputti.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://siddharthaputti.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HFT45VFBX6"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-HFT45VFBX6', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Topic Modeling" />
+<meta property="og:description" content="All this is going to be in lame/understandable language." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://siddharthaputti.github.io//posts/topic_modeling/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-03-15T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-03-15T00:00:00&#43;00:00" />
+
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://siddharthaputti.github.io//posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Word Embedding",
+      "item": "https://siddharthaputti.github.io//posts/topic_modeling/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Topic Modeling",
+  "name": "Topic Modeling",
+  "description": "All this is going to be in lame/understandable language.",
+  "keywords": [
+    "nlp", "language-model", "alignment", "steerability", "prompting"
+  ],
+  "articleBody": "",
+   "wordCount" : "4428",
+  "inLanguage": "en",
+  "datePublished": "2023-03-15T00:00:00Z",
+  "dateModified": "2023-03-15T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Siddhartha Putti"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://siddharthaputti.github.io//posts/topic_modeling/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sid'IO",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://siddharthaputti.github.io/doge.png"
+    }
+  }
+}
+
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$','$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+
+  window.addEventListener('load', (event) => {
+      document.querySelectorAll("mjx-container").forEach(function(x){
+        x.parentElement.classList += 'has-jax'})
+    });
+
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://siddharthaputti.github.io/" accesskey="h" title="Sid&#39;IO (Alt + H)">Sid&#39;IO</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://siddharthaputti.github.io/faq" title="FAQ">
+                    <span>FAQ</span>
+                </a>
+            </li>
+           
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Efficient fine tuning with lower data than required.
+    </h1>
+    <div class="post-meta"><span title='2023-03-15 00:00:00 +0000 UTC'>Dec 17, 2023</span>&nbsp;·&nbsp;20 min&nbsp;·&nbsp; Siddhartha Putti
+    </div>
+  <div class="post-content"><p><strong>NOT HAVE ENOUGH DATA TO FINE-TUNE LARGE MODELS?</strong>, - LoRA is the way.</p>
+<p><strong>LoRA</strong> - Low Rank Adaption.</p>
+<p><strong>QLoRA</strong> - Quantised Low Rank Adaption</p>
+<p>If you are not familiar with Rank of matrix, let's look at overview of what a Rank is and how it is defined.</p>
+<h2 id="Rank of a Matrix">Rank of a Matrix<a hidden class="anchor" aria-hidden="true" href="#Rank_of_a_Matrix">#</a></h2>
+<p>Rank can be defined in two different ways: </p>
+<ol>
+    <li><p>Rank is popularly defined as number of independent row or columns in a matrix. when I say rows or coumns, you consider rows if #of rows < #of columns else otherwise.</p></li>
+    <p>
+        <div>
+            For Example:
+            \[
+            \begin{bmatrix}
+              0 & 1 & 2 \\
+              1 & 2 & 1 \\
+              2 & 7 & 8 
+            \end{bmatrix}
+            \]
+          </div>
+          <p>Here row 1 and 2 are linearly independent where as row3 is linear combination of 1 and 2. specifically row3 = 3(row1) + 2(row2). So, rank of this matrix is 2.</p>
+
+    </p>
+    <li><p>Rank can also be said by, the number of non-zero row vectors in <strong>Row Echelon Matrix.</strong> </p></li>
+    <p>Now what is Row Echelon Transformation for a matrix? I'll make it simple to understand...</p>
+    <p>A matrix is in REF (Row Echelon Form) if:
+        <ol>
+            <li><p>The first non zero element in each row is 1.</p></li>
+            <li><p>The following rows should have 1 to the right column of the previous row's 1. assume row zero have 1 in 0th column, row1 should start with 1 on 1st column.</p></li>
+            <li><p>The rows with all zeors must be after rows with non-zeros.</p></li>
+        </ol>
+        <div>
+            For Example:
+            \[
+            \begin{bmatrix}
+              1 & 4 & 9 \\
+              0 & 1 & 2 \\
+              0 & 0 & 0 
+            \end{bmatrix}
+            \]
+          </div>
+          <p>This is example for transformed RFE. you can learn full transformation on <a href="https://stattrek.com/matrix-algebra/echelon-transform#MatrixA">this post.</a></p>
+    </p>
+    <p>Low-Rank? if rank of a matrix is significantly lower than number of rows/columns in a matrix. what does this mean? there are significantly higher number of linearly dependent rows in a matrix which also 
+        means there is high correlation in data which also says not all rows contain independent data. This redundancy provides an opportunity to represent data more efficiently by capturing the important information with fewer rows/parameters.
+    </p>
+    <p>Well, what do you think that low rank matrix is used for and what is importance of low rank matrix? The charecteristic of having more number of redundant rows makes the matrix used for efficient matrix factorization
+        (MF) problem. which means representing matrix in product of lower dimension matrices. A(mxn) = B(mxk) * C(kxn).    </p>
+    <p>How does having more redundant rows makes it easy for MF? and MF can't be performed on full rank matrix?  Indeed you can perform MF on full-rank but If the rows of A are linearly dependent or redundant, 
+        it implies that there is shared information among these rows. This shared information can be captured by the factorization process, leading to a more concise representation.
+        As a result, the factorization task becomes more manageable because fewer unique patterns need to be represented by the factor matrices.</p>
+</ol>
+<p>Easy right? how is this all related to fine-tuning a large model?</p>
+<p>Before jumping into LoRA, let's see how fine-tuning is performed before LoRA got introduced.</p>
+<h2 id="Pre-birth of LoRA">Pre-birth of LoRA<a hidden class="anchor" aria-hidden="true" href="#Pre-birth_of_LoRA">#</a></h2>
+<p> There are many studies done over fine-tuning a large model for down-stream task. if you are wondering the terminology, let me explain. </p>
+<p> Assume there is very large model(assume ChatGPT) trained on much larger data which is hard for general audience like us can get hands on. Now that you have all the trained parameters from large model
+    how can you use the model parameters for a specific task(like classification{down-stream task} of documents instead of Q/A like chatGPT)? This is where fine-tuning is prominant. 
+</p>
+<ol>
+    <li><p>Introduce Adapters into the model. Adapters are a fancy term used for extra Dense layers. for example Houlsby et al. (2019) places 2 extra dense layers after every Transformer Block.</p>
+      <ul><li>  <p>The idea is to put rest of the parameters constant without updating on back-prop and update only adapters. This makes sure the original knowledge of large model is preserved and 
+        additional knowledge from lower amout of data is learnt through Adapters. Pretty good idea right? 
+    </p></li>
+    <li><p>But what is the issue in here? Though this way of learning is accepted theoritically, practically this involves a higher amout of latency into the model even if we have smaller dense dimension 
+        , as the dense layers needs to be processed sequentially and can not be parallelised. more specifically when on online tasks where batch-size is 1 and running on single GPU.
+    </p></li> 
+</ul> </li>
+    <li><p>Direct optimization or prefix tuning.</p></li>
+    <ul><li><p>Direct optimization tries to improve the performance of a model by directly adjusting the input prompts or queries given to the model. That is to find a most effective way
+        to phrase a prompt to get the desired output. for example: "The cat is on the .... finish this sentence" <- this is the prompt given to the model and look at the output. Now try to increase the 
+        prompt accuracy "complete the following phrase, The cat is located on the...." the response from the model might increase or decrease,  
+        In other words, a small tweak might not necessarily result in a better model response. It could, in fact, make the performance worse or not improve at all. 
+    </p></li>
+    <li><p>Prefix tuning cuts the input prompts and expects model to adapt to the rest of the un-available data. This makes model to put extra effort to adapt to the input sequence. 
+        This reduction in available information may make tuning the prompt less effective compared to other methods.</p></li>
+</ul>
+</ol>
+
+<h2 id="Most awaited part 'THE LoRA.......'">Most awaited part 'THE LoRA.......'<a hidden class="anchor" aria-hidden="true" href="#Most_awaited_part_'THE_LoRA.......'">#</a></h2>
+<ul>
+    <li><p>If you remember, when we do a forward pass we perform: activation(W.input + b)</p></li>
+    <li><p>Here, while back prop you update the weight W with respect to its loss. In our case as the model is pretrained and the W matrix is already updated.</p></li>
+    <li><p>Now LoRA introduces a low ranked matrix when multiplying with input in forward pass, the equation looks like....</p></li>
+        $$
+        \rho (W \cdot x + BA \cdot x)
+        $$ 
+    <li><p>If W is of shape (1000,512),assume B is of shape (1000, 25), A is of shape (25, 512). Now, instead of 512,000 parameters of W, we will have 25,000 + 12,800= 37,800 
+        parameters that are need to updated</p></li>
+    <li><p>To be precise, you add BA.X in the forward pass and update only B,A on the back prop keeping W parameters constant.</p></li>
+    <li><p>Here rank=25 is a tunable parameter, The lower the rank the higher the chance that model doesnt learn, and the higher the rank the more redundant info you are introducing.</p></li>
+</ul>
+
+
+<p>The whole point in this is, the matrix W have many unnecessary weigths that are not meaningful for our problem which are redundant. They doesnt add any information to the problem, they are just combination of other weights. 
+    So we can actually train a much lower matrix with required weights. Hence we use low rank approximation.  
+</p>
+
+<p>Let's also look at the implimentation part of LoRA in tensorflow.</p>
+<p><pre tabindex="0"><code>  
+    import tensorflow as tf
+    from tensorflow.keras import layers, models
+
+    class ExampleNN(tf.keras.Model):
+        def __init__(self, hidden_size_1=1000, hidden_size_2=2000):
+            super(RichBoyNet, self).__init__()
+            self.flatten = layers.Flatten()
+            self.linear1 = layers.Dense(hidden_size_1, activation='relu')
+            self.linear2 = layers.Dense(hidden_size_2, activation='relu')
+            self.linear3 = layers.Dense(10)
+
+        def call(self, img):
+            x = self.flatten(img)
+            x = self.linear1(x)
+            x = self.linear2(x)
+            x = self.linear3(x)
+            return x
+
+</code></pre></p>
+
+<p>Keep a copy of the original weights so later we can prove that a fine-tuning with LoRA doesnt change original weights</p>
+
+<p><pre tabindex="0"><code>  
+    net = ExampleNN()
+
+    # Create a dictionary to store the original weights
+    original_weights = {}
+
+    # Iterate over the trainable variables of the model
+    for var in net.trainable_variables:
+        # Use the variable name as the key and store the variable value
+        original_weights[var.name] = var.numpy().copy()
+
+</code></pre></p>
+
+<p>Create a Module for LoRA such that we can have leverage to turn on and off the LoRA, when turned off original weights needs to be returned.</p>
+
+<p><pre tabindex="0"><code> 
+
+
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+class LoRAParametrization(tf.Module):
+
+    """
+    LoRAParametrization: Linearly Transformed Parametrization for Neural Networks.
+
+    Args:
+    - features_in (int): Number of input features.
+    - features_out (int): Number of output features.
+    - rank (int): Rank of the LoRA parametrization.
+    - alpha (float): Scaling factor for LoRA.
+
+    """
+    def __init__(self, features_in, features_out, rank=1, alpha=1):
+        self.lora_A = tf.Variable(tf.zeros((rank, features_out)))
+        self.lora_B = tf.Variable(tf.zeros((features_in, rank)))
+        tf.random.normal(self.lora_A, mean=0, stddev=1)
+        self.scale = alpha / rank
+        self.enabled = True
+
+    def __call__(self, original_weights):
+
+        """
+        Apply LoRA parametrization to the original weights.
+
+        Args:
+        - original_weights (tf.Tensor): Original weights of the layer.
+
+        Returns:
+        - tf.Tensor: Updated weights after applying LoRA.
+
+        """
+
+        if self.enabled:
+            return original_weights + tf.matmul(self.lora_B, self.lora_A) * self.scale
+        else:
+            return original_weights
+</code></pre></p>
+
+<p>for each layer introduce the parametrization with LoRA. and define enabling or disabling LoRA to each layer. </p>
+
+<p><pre tabindex="0"><code> 
+class LinearLayerParametrization(tf.Module):
+    def __init__(self, layer, rank=1, lora_alpha=1):
+        features_in, features_out = layer.weights[0].shape
+        self.lora = LoRAParametrization(features_in, features_out, rank=rank, alpha=lora_alpha)
+
+def linear_layer_parameterization(layer, rank=1, lora_alpha=1):
+    """
+    Create a parametrization for a linear layer using LoRA.
+
+    Args:
+    - layer (tf.keras.layers.Layer): Linear layer to be parametrized.
+    - rank (int): Rank of the LoRA parametrization.
+    - lora_alpha (float): Scaling factor for LoRA.
+
+    Returns:
+    - LinearLayerParametrization: Parametrization for the linear layer.
+
+    """
+
+
+    return LinearLayerParametrization(layer, rank=rank, lora_alpha=lora_alpha)
+
+# Assuming 'net' is an instance of ExampleNN
+net = ExampleNN()
+
+# Create LoRA parametrizations for linear layers
+net.linear1.parametrizations.append(linear_layer_parameterization(net.linear1))
+net.linear2.parametrizations.append(linear_layer_parameterization(net.linear2))
+net.linear3.parametrizations.append(linear_layer_parameterization(net.linear3))
+
+def enable_disable_lora(enabled=True):
+    for layer in [net.linear1, net.linear2, net.linear3]:
+        layer.parametrizations[0].lora.enabled = enabled
+
+    </code></pre></p>
+
+<p>Freeze all the parameters of the original network and only fine tuning the ones introduced by LoRA. Then fine-tune the model on new data.</p>
+
+    <p><pre tabindex="0"><code> 
+# Freeze the non-LoRA parameters
+for layer in net.layers:
+    for var in layer.trainable_variables:
+        if 'lora' not in var.name:
+            print(f'Freezing non-LoRA parameter {var.name}')
+            var.trainable = False
+
+    </code></pre></p>
+  <footer class="post-footer">
+
+<!-- <nav class="paginav">
+  <a class="prev" href="/posts/word_embedding/">
+    <span class="title">« </span>
+    <br>
+    <span>Basic Word Embedding</span>
+  </a>
+  <a class="next" href="/posts/Transformers/">
+    <span class="title"> »</span>
+    <br>
+    <span>Transformers?</span>
+  </a>
+</nav> -->
+
+
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://siddharthaputti.github.io/">Sid&#39;IO</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = 'copy';
+
+        function copyingDone() {
+            copybutton.innerText = 'copied!';
+            setTimeout(() => {
+                copybutton.innerText = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
