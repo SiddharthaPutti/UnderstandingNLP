@@ -238,6 +238,12 @@ if (!doNotTrack) {
     <ul><li><p>As we do not have most of the resources to collect large amounts of datasets to create a model for machine translation, hugging face provides pre-trained models. that the weights of the entire architecture are provided, such that we can use the pre-trained version of the model on our available comparatively smaller dataset to fine-tune. this process is called "TRANSFER LEARNING".</p></li></ul>
 </ul>
 
+<ul>To simplify for those unfamiliar with these architectures, think of the process as a team working on a puzzle. The encoder (BERT) examines every piece (word), 
+    understanding its details and position. Instead of deciding where each piece goes, it makes notes (hidden states) on each. The decoder (GPT) then uses these notes to put the puzzle together, 
+    deciding the placement one piece at a time. Attention is like giving the decoder a magnifying glass to focus on the most relevant notes first. Self-attention lets all team members (words) 
+    simultaneously share insights, speeding up the puzzle-solving. Transfer learning is akin to starting with a partially completed puzzle, using patterns recognized in previous puzzles 
+    (pre-trained models) to help finish the new one faster.</ul>
+
 <h2 id="Hugging Face">Hugging Face<a hidden class="anchor" aria-hidden="true" href="#Hugging_Face">#</a></h2>
 <ul>
     <li><p>pipelines: This pipeline() method from hugging face abstracts away all the steps need to convert raw text into set of predictions from a pre-trained/fine-tuned model.</p></li>
