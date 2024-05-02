@@ -246,6 +246,13 @@ if (!doNotTrack) {
     <b>Backward pass: </b>
 <p>During the backward pass, gradients are initially computed in float16 for speed. However, to avoid issues with small gradients disappearing (underflow), these gradients are converted to float32 for the update step.</p>
 </li>
+
+<img src="forward_backward.png" alt="forward_backward">
+
+<p>Here, the advantage of maintaining a copy of the weights in FP32 becomes apparent. Since the learning rate is usually small, the resulting product with the weight gradients can result in very minute values. For FP16, any number smaller than 2^(-24) is effectively considered zero because it falls below the threshold that FP16 can represent (this threshold is known as the denormalized limit for FP16). Hence, by performing updates in FP32, we ensure that these small update values are retained.
+
+    This dual usage of FP16 and FP32 is why this approach is referred to as mixed-precision training.</p>
+
 <h2 id="The Task">The Task:<a hidden class="anchor" aria-hidden="true" href="#The_Tasks">#</a></h2>
 <p>For tasks like machine transilation and automatic speech recognition, the usage of se2seq models have been popular in the recent years. For such tasks traditionally we use sequential encoder and sequential decoder architecture.</p>
 <p>The common frameworks for deep learning like Tensorflow and Pytorch typically have different built in architectures for thses seq2seq tasks to perform MPT. Some of the Tf based results are shared in this <a href="https://ar5iv.labs.arxiv.org/html/1805.10387">arxiv.</a> </p>
@@ -282,6 +289,8 @@ Unscale and Update: After backpropagation, before updating the model weights, Gr
 <li>
 Update Scaler: After each step, the scaler updates its internal scale factor, potentially adjusting it based on the magnitude of the gradients to prevent both underflow and overflow.
 </li>
+
+<img src="scale.png" alt="scaler">
 
 <p>To put it altogether, here is the implimentation of simple seq2seq model in PyTorch.</p>
 
