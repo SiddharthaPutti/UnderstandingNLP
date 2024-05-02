@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Mixed Precision Training | Sid&#39;IO</title>
+<meta name="keywords" content="nlp, language-model, alignment, steerability, prompting" />
+<meta name="description" content="All this is going to be in lame/understandable language.">
+<meta name="author" content="Siddhartha Putti">
+<link rel="canonical" href="https://siddharthaputti.github.io//posts/LoRA/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.67a6fb6e33089cb29e856bcc95d7aa39f70049a42b123105531265a0d9f1258b.css" integrity="sha256-Z6b7bjMInLKehWvMldeqOfcASaQrEjEFUxJloNnxJYs=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://siddharthaputti.github.io/doge.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://siddharthaputti.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://siddharthaputti.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://siddharthaputti.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://siddharthaputti.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HFT45VFBX6"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-HFT45VFBX6', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Mixed Precision Training" />
+<meta property="og:description" content="Mixed Precision Training" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://siddharthaputti.github.io//posts/LoRA/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-03-15T00:00:00&#43;00:00" />
+<meta property="article:modified_time" content="2023-03-15T00:00:00&#43;00:00" />
+
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://siddharthaputti.github.io//posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Word Embedding",
+      "item": "https://siddharthaputti.github.io//posts/LoRA/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mixed Precision Training",
+  "name": "Mixed Precision Training",
+  "description": "Mixed Precision Training",
+  "keywords": [
+    "nlp", "language-model", "alignment", "steerability", "prompting"
+  ],
+  "articleBody": "",
+   "wordCount" : "4428",
+  "inLanguage": "en",
+  "datePublished": "2023-03-15T00:00:00Z",
+  "dateModified": "2023-03-15T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Siddhartha Putti"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://siddharthaputti.github.io//posts/mixed-precision-training/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sid'IO",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://siddharthaputti.github.io/doge.png"
+    }
+  }
+}
+
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$','$$'], ['\\[', '\\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+
+  window.addEventListener('load', (event) => {
+      document.querySelectorAll("mjx-container").forEach(function(x){
+        x.parentElement.classList += 'has-jax'})
+    });
+
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://siddharthaputti.github.io/" accesskey="h" title="Sid&#39;IO (Alt + H)">Sid&#39;IO</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://siddharthaputti.github.io/faq" title="FAQ">
+                    <span>FAQ</span>
+                </a>
+            </li>
+           
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Ever heard of Mixed Precision Training? 
+    </h1>
+    <div class="post-meta"><span title='2023-03-15 00:00:00 +0000 UTC'>May 02, 2024</span>&nbsp;·&nbsp;20 min&nbsp;·&nbsp; Siddhartha Putti
+    </div>
+  <div class="post-content"><p><strong>What is precision in the first place? </strong>, not your typical model's prediciton precision!</p>
+<p>The term precision referes to numerical data type used to represent values. That is, how many number of precised bits we require after decimal point in a number.</p>
+<p>Coming to floating point(numbers with decimal), we have majorly 3 different types:
+    <ol>
+        <li><p>float32: It uses 32 bits to represent a number. also called as single-precision.</p></li>
+        <li><p>float64: As you guessed, uses 64 bits and also called as double-precision.</p></li>
+        <li><p>Likewise, float16 which is also referred as half-precision.</p></li>
+    </ol>
+ </p>
+ <p>Typically GPUs from Nvidia before RTX version uses any one of the kinds of precisions mentioned above. But using only float32 for the entire deep learning model required a lot of computation
+    power and time. To make the trade-off between computation power and model's efficiency in predictions[accuracy or other metrics] we can adapt Mixed Precision Training.
+ </p>
+ <ol>
+ <p>Mixed precision Training typically leverages both float32 and float16 types wherever necessary to achieve faster computation and lower memory footprint.</p>
+ <p>Mixed-precision also reduces the amount of memory required, allowing users to increase the size of batches or models, which, in turn, increases the learning capacity of the model and reduces the training time.</p>
+</ol>
+
+ <h2 id="The process">The process:<a hidden class="anchor" aria-hidden="true" href="#The_process">#</a></h2>
+<li>
+<b>Forward pass: </b>
+<p>During the forward pass, where the model makes predictions, most operations are performed using float16. This significantly speeds up calculations and reduces memory consumption.</p>
+</li>
+<li>
+    <b>Loss calculation: </b>
+<p>The loss calculation can be sensitive to precision; therefore, it is often calculated using float32 to maintain the accuracy of gradient computations.</p>
+</li>
+<li>
+    <b>Backward pass: </b>
+<p>During the backward pass, gradients are initially computed in float16 for speed. However, to avoid issues with small gradients disappearing (underflow), these gradients are converted to float32 for the update step.</p>
+</li>
+<h2 id="The Task">The Task:<a hidden class="anchor" aria-hidden="true" href="#The_Tasks">#</a></h2>
+<p>For tasks like machine transilation and automatic speech recognition, the usage of se2seq models have been popular in the recent years. For such tasks traditionally we use sequential encoder and sequential decoder architecture.</p>
+<p>The common frameworks for deep learning like Tensorflow and Pytorch typically have different built in architectures for thses seq2seq tasks to perform MPT. Some of the Tf based results are shared in this <a href="https://ar5iv.labs.arxiv.org/html/1805.10387">arxiv.</a> </p>
+
+<p>In PyTorch, mixed precision training is facilitated using PyTorch's automatic mixed precision (AMP) tools, specifically through the use of the autocast context manager and the GradScaler. Here’s how each of these tools is integrated into the model training process to enable mixed precision:</p>
+<p><pre tabindex="0"><code>  
+    with autocast():
+        hidden, cell = model.encoder(src)
+        ...
+        loss = criterion(outputs, trg)
+</code></pre></p>
+
+<p><b>Within this autocast block:</b></p>
+<p>
+    The model’s forward pass (both encoder and decoder operations) and the loss computation are performed in mixed precision.</p>
+    <p>
+    autocast automatically determines which operations should be done in float16 to speed up computation and reduce memory usage while ensuring others that require higher numerical precision remain in float32.</p>
+<p> <b>GradScaler:</b>
+    The GradScaler is used to manage gradient scaling, which helps prevent underflow during backpropagation when gradients are computed in float16:</p>
+
+
+<p><pre tabindex="0"><code>  
+    scaler.scale(loss).backward()
+    scaler.step(optimizer)
+    scaler.update()
+</code></pre></p>
+<b>Here's how GradScaler works:</b>
+<li>
+Scale Up the Loss: Before the backward pass, the loss is scaled up (typically by a large factor) to ensure the gradient values do not underflow to zero when multiplied by small learning rates during optimization.
+</li>
+<li>
+Unscale and Update: After backpropagation, before updating the model weights, GradScaler unscales the gradients back to their appropriate magnitudes. This step is crucial to ensure the model weights are updated correctly without being influenced by the artificially increased gradients.
+</li>
+<li>
+Update Scaler: After each step, the scaler updates its internal scale factor, potentially adjusting it based on the magnitude of the gradients to prevent both underflow and overflow.
+</li>
+
+<p>To put it altogether, here is the implimentation of simple seq2seq model in PyTorch.</p>
+
+<p><pre tabindex="0"><code> 
+
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    from torch.cuda.amp import autocast, GradScaler
+
+    class Encoder(nn.Module):
+        def __init__(self, input_dim, emb_dim, hid_dim, n_layers, dropout):
+            super().__init__()
+            self.embedding = nn.Embedding(input_dim, emb_dim)
+            self.rnn = nn.LSTM(emb_dim, hid_dim, n_layers, dropout=dropout, batch_first=True)
+            self.dropout = nn.Dropout(dropout)
+
+        def forward(self, src):
+            embedded = self.dropout(self.embedding(src))
+            outputs, (hidden, cell) = self.rnn(embedded)
+            return hidden, cell
+
+    class Decoder(nn.Module):
+        def __init__(self, output_dim, emb_dim, hid_dim, n_layers, dropout):
+            super().__init__()
+            self.output_dim = output_dim
+            self.embedding = nn.Embedding(output_dim, emb_dim)
+            self.rnn = nn.LSTM(emb_dim, hid_dim, n_layers, dropout=dropout, batch_first=True)
+            self.fc_out = nn.Linear(hid_dim, output_dim)
+            self.dropout = nn.Dropout(dropout)
+
+        def forward(self, input, hidden, cell):
+            input = input.unsqueeze(1)
+            embedded = self.dropout(self.embedding(input))
+            output, (hidden, cell) = self.rnn(embedded, (hidden, cell))
+            prediction = self.fc_out(output.squeeze(1))
+            return prediction, hidden, cell
+
+</code></pre></p>
+
+<b>Setting Up Training:</b>
+<p>For training, we'll use the automatic mixed precision provided by PyTorch:</p>
+
+<p><pre tabindex="0"><code> 
+    def train(model, iterator, optimizer, criterion, clip, scaler):
+        model.train()
+        epoch_loss = 0
+
+        for src, trg in iterator:
+            optimizer.zero_grad()
+
+            with autocast():
+                hidden, cell = model.encoder(src)
+                trg_len = trg.shape[1]
+                outputs = torch.zeros(trg_len, trg.shape[0], model.decoder.output_dim).to(src.device)
+                
+                input = trg[:, 0]
+                for t in range(1, trg_len):
+                    output, hidden, cell = model.decoder(input, hidden, cell)
+                    outputs[t] = output
+                    input = output.argmax(1)  # Teacher forcing could be used here
+                
+                output_dim = outputs.shape[-1]
+                outputs = outputs[1:].view(-1, output_dim)
+                trg = trg[:, 1:].reshape(-1)
+
+                loss = criterion(outputs, trg)
+
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+
+            epoch_loss += loss.item()
+
+        return epoch_loss / len(iterator)
+
+</code></pre></p>
+
+
+
+<!-- <nav class="paginav">
+  <a class="prev" href="/posts/word_embedding/">
+    <span class="title">« </span>
+    <br>
+    <span>Basic Word Embedding</span>
+  </a>
+  <a class="next" href="/posts/Transformers/">
+    <span class="title"> »</span>
+    <br>
+    <span>Transformers?</span>
+  </a>
+</nav> -->
+
+<b>Numerical Stability Considerations: </b>
+<li>Loss Scaling: This is handled by GradScaler, which scales up the loss before backward pass to prevent underflow of gradients.</li>
+<li>Sensitive Calculations: Operations that need high precision (like loss calculation and updates to weights) should be done in float32. This is handled by automatic casting in autocast, but sometimes manual control is necessary, especially if the model shows signs of instability or non-convergence.</li>
+
+<h2 id="Considerations">Considerations:<a hidden class="anchor" aria-hidden="true" href="#Considerations">#</a></h2>
+
+<li><b>Complexity and Depth:</b> Different architectures may respond uniquely to mixed precision training. Layers deep in a model might require more precision to prevent the accumulation of computational errors.</li>
+<li><b>Compatibility:</b> Some custom layers or operations might not fully support mixed precision or may require specific adjustments to work effectively with autocast.</li>
+<li><b>Underflow and Overflow::</b> Beyond just scaling gradients, pay attention to places where numerical values could become too small (underflow) or too large (overflow), especially in the case of exponential and logarithmic operations common in loss functions or activation layers.</li>
+<li><b>GPU Capabilities:</b> Not all GPUs are optimized for mixed precision training. Ensure that your hardware can effectively leverage float16 computations. Nvidia GPUs with Tensor Cores (like the Volta, Turing, and Ampere series) are specifically designed to accelerate mixed precision training.</li>
+<li><b>Data Loading and Augmentation:</b> Data precision can also impact training. Ensure that your data preprocessing and augmentation pipelines are aligned with the precision requirements of your training regime.</li>
+<li><b>Batch Sizing: </b> With reduced memory requirements due to mixed precision, it may be possible to increase batch sizes. This can speed up training but might also affect model generalization and convergence behavior.</li>
+<li><b>Tracking and Visualization:</b>  Use tools like TensorBoard or custom logging to monitor training progress, especially watching for signs of instability or poor convergence that might be due to precision issues.</li>
+<li><b>Experimentation with Precision: </b> Some parts of your model might benefit from staying in float32, or even need higher precision like float64. Experimentation and iterative testing can help determine the optimal precision configuration for different parts of your model.</li>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://siddharthaputti.github.io/">Sid&#39;IO</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerText = 'copy';
+
+        function copyingDone() {
+            copybutton.innerText = 'copied!';
+            setTimeout(() => {
+                copybutton.innerText = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
