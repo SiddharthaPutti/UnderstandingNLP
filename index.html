@@ -58,6 +58,90 @@
  
     </style>
 </noscript>
+<style>
+    @media (max-width: 991px) {
+    .HomepageAnonTopics_bg-2 {
+        display: none;
+    }
+}
+</style>
+
+<style>
+    /* From Uiverse.io by andrew-demchenk0 */
+    .pyramid-loader {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        display: block;
+        transform-style: preserve-3d;
+        transform: rotateX(-20deg);
+        margin: 0 auto; /* Center the loader horizontally */
+    }
+
+    .wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform-style: preserve-3d;
+        animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+        100% {
+            transform: rotateY(360deg);
+        }
+    }
+
+    .pyramid-loader .wrapper .side {
+        width: 70px;
+        height: 70px;
+        /* you can choose any gradient or color you want */
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        transform-origin: center top;
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+
+    .pyramid-loader .wrapper .side1 {
+        transform: rotateZ(-30deg) rotateY(90deg);
+        background: conic-gradient(#2BDEAC, #F028FD, #D8CCE6, #2F2585);
+    }
+
+    .pyramid-loader .wrapper .side2 {
+        transform: rotateZ(30deg) rotateY(90deg);
+        background: conic-gradient(#2F2585, #D8CCE6, #F028FD, #2BDEAC);
+    }
+
+    .pyramid-loader .wrapper .side3 {
+        transform: rotateX(30deg);
+        background: conic-gradient(#2F2585, #D8CCE6, #F028FD, #2BDEAC);
+    }
+
+    .pyramid-loader .wrapper .side4 {
+        transform: rotateX(-30deg);
+        background: conic-gradient(#2BDEAC, #F028FD, #D8CCE6, #2F2585);
+    }
+
+    .pyramid-loader .wrapper .shadow {
+        width: 60px;
+        height: 60px;
+        background: #8B5AD5;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        transform: rotateX(90deg) translateZ(-40px);
+        filter: blur(12px);
+    }
+
+</style>
+
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-HFT45VFBX6"></script>
 <script>
 var doNotTrack = false;
@@ -90,6 +174,7 @@ if (!doNotTrack) {
   ]
 }
 </script>
+
 </head>
 
 <body class="list" id="top">
@@ -164,6 +249,7 @@ if (!doNotTrack) {
         </ul>
     </nav>
 </header>
+<img src="https://cpwebassets.codepen.io/assets/packs/lines-2-4e66616a5ef291c3566a7ddfe1ffaaa8.svg" alt="" class="HomepageAnonTopics_bg-2" style="width: 30%; height: auto; float: right; margin-right: 15%;">
 <main class="main"> 
 <article class="first-entry home-info">
     <!-- <header class="entry-header">
@@ -249,16 +335,38 @@ if (!doNotTrack) {
     <a class="entry-link" aria-label="post link to Prompt Engineering" href="page/3"></a>
   </article>
 
+  <article class="post-entry"> 
+    <header class="entry-header">
+      <h2>MLOps
+      </h2>
+    </header>
+    <section class="entry-content">
+      <p>Deployment, Maitainance, Monitoring.</p>
+    </section>
+    <footer class="entry-footer"><span title='2023-04-15 00:00:00 +0000 UTC'>Sept, 2022 | </span>Siddhartha Putti</footer>
+    <a class="entry-link" aria-label="post link to Prompt Engineering" href="/404.html"></a>
+  </article>
+
+  <div class="pyramid-loader">
+    <div class="wrapper">
+        <div class="side side1"></div>
+        <div class="side side2"></div>
+        <div class="side side3"></div>
+        <div class="side side4"></div>
+        <div class="shadow"></div>
+    </div>
+</div>
+
     </main>
-    
-<footer class="footer">
+<img src="https://cpwebassets.codepen.io/assets/packs/lines-3-4541e35a1939230404d773f7eeddcc9b.svg" alt="" class="HomepageAnonTopics_bg-2" style="width: 30%; height: auto; float: left; margin-left: 15%; margin-top: -13%;">
+<!-- <footer class="footer">
     <span>&copy; 2023 <a href="https://siddharthaputti.github.io/">Sid&#39;IO</a></span>
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
         <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
     </span>
-</footer>
+</footer> -->
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
         <path d="M12 6H0l6-6z" />
