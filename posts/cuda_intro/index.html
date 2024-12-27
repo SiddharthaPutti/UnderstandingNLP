@@ -299,17 +299,17 @@ if (!doNotTrack) {
     <li>we've made a modification now that we want to think about a GPU-accelerated application, and the way that we have to think about this is that 
         we have two separate devices that we're going to be working with. We have the traditional CPU, and we also have the GPU device. </li>
     <li>In a GPU-accelerated application, we can allocate our data, and that data will be initially available on the CPU. we are going to be 
-        using a call to cudaMallocManaged() to allocate our data. Here, once we have allocated it with cudaMallocManaged, we can still perform 
+        using a call to <b>cudaMallocManaged()</b> to allocate our data. Here, once we have allocated it with <b>cudaMallocManaged()</b>, we can still perform 
         functions such as the initialization of the values in the data on the CPU. </li>
     <li>However, now when we wish to perform work, we can indicate that we wish to perform the work on the GPU, where, as is represented 
-        in this picture above, it will be performed largely in parallel. Having used cudaMallocManaged to allocate the data, 
+        in this picture above, it will be performed largely in parallel. Having used <b>cudaMallocManaged()</b> to allocate the data, 
         the data will automatically be migrated to the GPU, where the parallel work can be done. </li>
     <li>Worth mentioning that work on the GPU is asynchronous to the work that could be happening on the CPU at the same time. 
         To represent that in this picture, we've shown that while the GPU is performing its work in parallel, it may be the case that 
         we wish to do some other work on the CPU at the same time. It's going to be important at times to synchronize our CPU code with 
         the completion of the work or some of the work that's happening on the GPU, and we can do that by creating synchronization barriers. 
-        You'll be looking at a particular way to do that using a call to cudaDeviceSynchronize. Let's assume for the sake of example that we 
-        then wish to do some downstream verification of our GPU work on the CPU. Having used cudaMallocManaged to allocate our data, the data 
+        You'll be looking at a particular way to do that using a call to <b>cudaDeviceSynchronize()</b>. Let's assume for the sake of example that we 
+        then wish to do some downstream verification of our GPU work on the CPU. Having used <b>cudaMallocManaged()</b> to allocate our data, the data 
         accesses by the CPU will automatically be migrated back to the CPU. </li>
 
 <h2 style="margin-top: 40px">CUDA kernel execution</h2>
@@ -336,8 +336,8 @@ if (!doNotTrack) {
         In this image, you can see that we are defining there should be two blocks in the grid. The execution configuration also defines the number of 
         threads that should be in each block. So, here we are stating that we should have four threads in each of our two blocks. 
         Worth mentioning is that every block in the grid will contain the same number of threads. </li>
-    <li>To summarize, The kernel function is defined using the __global__ keyword, and it takes in a variable number of arguments. The arguments are passed to the kernel
-         function using the <<<>>> syntax, where the first argument is the number of blocks in the grid, and the second argument is the number of threads 
+    <li>To summarize, The kernel function is defined using the <b>__global__</b> keyword, and it takes in a variable number of arguments. The arguments are passed to the kernel
+         function using the <b><<<>>></b> syntax, where the first argument is the number of blocks in the grid, and the second argument is the number of threads 
          in the block.</li>
 
 
@@ -352,7 +352,7 @@ if (!doNotTrack) {
             <!-- CUDA Example Tab -->
             <div id="cuda" class="tab-content active">
                 <pre><code class="language-c">
-        #include stdio.h
+        #include < stdio.h >
         
         void helloCPU()
         {
@@ -376,7 +376,7 @@ if (!doNotTrack) {
         <!-- Model Definition Tab -->
         <div id="model" class="tab-content">
             <pre><code class="language-python">
-            #include stdio.h
+            #include < stdio.h >
 
             __global__ void firstParallel()
             {
@@ -441,7 +441,7 @@ if (!doNotTrack) {
                 <!-- CUDA Example Tab -->
                 <div id="svu" class="tab-content">
                 <pre><code class="language-c">
-                #include <stdio.h>
+                #include < stdio.h >
 
                 __global__ void printSuccessForCorrectExecutionConfiguration()
                 {
@@ -466,7 +466,7 @@ if (!doNotTrack) {
             <!-- Model Definition Tab -->
             <div id="pex" class="tab-content">
             <pre><code class="language-python">
-            #include stdio.h
+            #include < stdio.h >
             
             __global__ void loop()
             {
@@ -491,8 +491,352 @@ if (!doNotTrack) {
     
         </div>
 
+<h2 style="margin-top: 40px">Co-ordinating Parallel Threads</h2>
 
-  <footer class="post-footer">
+    <div style="margin: 20px 0">
+        <img src="data_assign.png" alt="CPU Timeline showing serial processing" style="max-width: 100%; height: auto;">
+    </div>
+
+    <li>Co-ordinating the work of parallel threads: Harking back to the previous sections, where we showed at a high level that we have some data that 
+        has been migrated to the GPU, where we would like to perform some work in parallel on that data. So we're going to zoom in on these two sections 
+        of our larger overarching diagram. Here we have, as we looked at in the previous section, our performwork kernel, which is being launched with 
+        an execution configuration specifying two blocks of four threads each. And we're going to add to this image some data which has been migrated 
+        to the GPU. And let's assume that the data is a zero-indexed vector, such that we could add some IDs to it to help us keep track of which value 
+        is which. Now, of course, in real situations, we're going to be working with much larger datasets. But for the sake of learning, we can keep our 
+        numbers smallish here. And it will be just fine for us to learn what we need to learn. </li>
+    <li>So the idea, of course, is that when we write critical to execute on the GPU, we would like somehow for each of these threads, which are 
+        executing in parallel, to be mapped to performwork on one of the elements in the vectors. There are certainly more sophisticated ways to 
+        work on data. But to begin with, I think it's a great place to start when we do something that we call embarrassingly parallel, where each 
+        of our threads is going to perform work on one item of data, and it's all going to happen in parallel. </li>
+    <li>So how are we going to write a kernel definition, in this case for perform work, that is going to allow each of these individual threads 
+        executing in parallel to perform work on one and only one of the items in our vector? So to figure this out, it's worth refreshing our 
+        memories about a few of the special variables that we have access to in our kernels. First, recall that each thread has access to the 
+        size of its block via the blockDim.x variable. It also has the index of its block within the grid via the blockIdx.x variable. 
+        And finally, it has its own index within its block via the threadIdx.x variable. So here you can see we have specified an index for each 
+        of the two blocks, indexes for each of the threads within the blocks, and also the dimension of each block, in this case four.</li>
+
+    <div style="margin: 20px 0">
+        <img src="formula.png" alt="CPU Timeline showing serial processing" style="max-width: 100%; height: auto;">
+    </div>
+
+    <li>Using these three variables, we have a very, very canonical formula that as you get exposed to more code, you're going to see very, very often. 
+        And the formula is <b>threadIdx.x + blockIdx.x * blockDim.x</b>. This particular formula is going to map every thread within the entire grid to one 
+        element in the vector. Another way that you can think about it is that this formula would give every thread a unique index among all the threads 
+        throughout the entire grid.</li>
+
+        <p><pre tabindex="0"><code> 
+            # simple formula execution kernel
+            #include < stdio.h >
+
+            /*
+                * Refactor `loop` to be a CUDA Kernel. The new kernel should
+                * only do the work of 1 iteration of the original loop.
+                */
+            
+            __global__ void loop()
+            {
+                printf("This is iteration number %d\n", threadIdx.x + blockIdx.x * blockDim.x);
+            }
+            
+            int main()
+            {
+                /*
+                * When refactoring `loop` to launch as a kernel, be sure
+                * to use the execution configuration to control how many
+                * "iterations" to perform.
+                *
+                * For this exercise, be sure to use more than 1 block in
+                * the execution configuration.
+                */
+            
+                
+                loop<<<2, 5>>>();
+                cudaDeviceSynchronize();
+            }
+        </code></pre></p>
+
+<h2 style="margin-top: 40px">Grid Size mismatch</h2>
+
+        <li>we're going to look at grid-size work amount mismatch. To say more on that, in the previous scenarios, as we discussed, the number of threads 
+            in the grid happened to match exactly the number of elements in the data that we wanted to work on. Now, for any number of reasons, this may 
+            not actually be the case for our program, so what if there are more threads in our grid than the amount of work that needs to be done? 
+            If we used the exact same setup that we used in the previous section, then we would be attempting to access non-existent elements, and 
+            this could definitely result in a runtime error and or other unintended consequences in our code. </li>
+
+            <div style="margin: 20px 0">
+                <img src="mismatch.png" alt="CPU Timeline showing serial processing" style="max-width: 100%; height: auto;">
+            </div>
+
+        <li>So, it's really quite straightforward. It's just that our code needs to check that the data index we calculate through our equation 
+            <b>threadIdx.x + blockIdx.x * blockDim.x</b> is actually less than N, which would be the number of data elements. So, with that in mind, 
+            if we know that N, in this case, is 5, because we have 5 data elements to work on, then we can extend our equation a little bit and 
+            perform a check that states that the result of our initial equation, which gives us our data index, needs to actually be less than the 
+            value of N. And if we look at this Thread0 in Block1 that's highlighted in green, if we run this check, we would see that the data index 4 
+            is less than N, which is 5, so it's fine, you can do work, and it would work on this element over here. However, for the next thread 
+            in the block, we would see that 5 is not less than 5, so we would not allow this particular thread to perform work, and same with the 
+            remaining threads in this block. </li> 
+
+<h2 style="margin-top: 40px">Grid-Stride Loop</h2>
+        <li>In this section, we're going to talk about a very common strategy we employ in our Cougar kernels, called a grid-stripe loop. 
+            So, very commonly, there are more data elements than there are threads in the grid. In this particular example, we have the imaginary grid 
+            that we are launching with the PerformWork kernel, which has two blocks of four threads each, giving us a total of eight threads. 
+            And in this example, we have a data vector that has 32 elements. So, if we were to employ the strategy that we've been doing thus far, 
+            where we had one thread working on one data element, this isn't going to work for us, because we're going to have a lot of work in the data 
+            that's left undone. So, one very common way to address this programmatically is with the creation of a grid-stripe loop. </li>
+
+            <div style="margin: 20px 0"></div>
+                <img src="stride-loop.png" alt="CPU Timeline showing serial processing" style="max-width: 100%; height: auto;">
+            </div>
+        <li>So, when we construct a grid-stripe loop inside of our kernel definition, we are going to construct a loop, as the name might suggest, 
+            where the thread's first element is calculated per usual with our <b>threadIdx + blockIdx * blockDim</b> calculation, giving that thread a unique 
+            index for all threads in the grid, and in this way, it will do its computation first on a single element. Now, within this loop that we're 
+            constructing, when we want to increment the value that maps to the data index, we are going to stride by the total number of threads in the 
+            grid. And we can ascertain the total number of threads in the grid by doing <b>blockDim.x * gridDim.x</b>. </li>
+        <li>In this situation, the block dimension is four, and the grid dimension is two, so that will give us a value of eight. So, in this way, 
+            the thread would continue to iterate through the loop. We would conclude the loop when the index is greater than the number of data 
+            elements that we have, and the thread would perform work on several different elements in the data. So, under the assumption that our 
+            kernel has been defined, then all the threads will be working in this similar way, and you can see, if we were to display this, 
+            that as each of the threads performs the same iteration, it would result in all elements of the data being covered. </li>
+  
+            <div class="code-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-button" onclick="showCode('gsm')">Grid size mismatch</button>
+                    <button class="tab-button" onclick="showCode('gsm2')">Grid size mismatch 2</button>
+                    <button class="tab-button" onclick="showCode('stl')">Stride Loop Example</button>
+                </div>
+            
+                <!-- CUDA Example Tab -->
+                <div id="gsm" class="tab-content">
+                    <pre><code class="language-c">
+                    #include < stdio.h >
+
+                    void init(int *a, int N)
+                    {
+                        int i;
+                        for (i = 0; i < N; ++i)
+                        {
+                        a[i] = i;
+                        }
+                    }
+                    
+                    __global__
+                    void doubleElements(int *a, int N)
+                    {
+                        int i;
+                        i = blockIdx.x * blockDim.x + threadIdx.x;
+                        if (i < N)
+                        {
+                        a[i] *= 2;
+                        }
+                    }
+                    
+                    bool checkElementsAreDoubled(int *a, int N)
+                    {
+                        int i;
+                        for (i = 0; i < N; ++i)
+                        {
+                        if (a[i] != i*2) return false;
+                        }
+                        return true;
+                    }
+                    
+                    int main()
+                    {
+                        int N = 1000;
+                        int *a;
+                    
+                        size_t size = N * sizeof(int);
+                    
+                        /*
+                        * Use `cudaMallocManaged` to allocate pointer `a` available
+                        * on both the host and the device.
+                        */
+                    
+                        cudaMallocManaged(&a, size);
+                    
+                        init(a, N);
+                    
+                        size_t threads_per_block = 256;
+                        size_t number_of_blocks = (N + threads_per_block - 1) / threads_per_block;
+                    
+                        doubleElements<<<number_of_blocks, threads_per_block>>>(a, N);
+                        cudaDeviceSynchronize();
+                    
+                        bool areDoubled = checkElementsAreDoubled(a, N);
+                        printf("All elements were doubled? %s\n", areDoubled ? "TRUE" : "FALSE");
+                    
+                        /*
+                        * Use `cudaFree` to free memory allocated
+                        * with `cudaMallocManaged`.
+                        */
+                    
+                        cudaFree(a);
+                    }
+                    </code></pre>
+            </div>
+        
+            <!-- Model Definition Tab -->
+            <div id="gsm2" class="tab-content">
+                <pre><code class="language-python">
+                #include < stdio.h >
+
+                /*
+                    * Currently, `initializeElementsTo`, if executed in a thread whose
+                    * `i` is calculated to be greater than `N`, will try to access a value
+                    * outside the range of `a`.
+                    *
+                    * Refactor the kernel definition to prevent out of range accesses.
+                    */
+                
+                __global__ void initializeElementsTo(int initialValue, int *a, int N)
+                {
+                    int i = threadIdx.x + blockIdx.x * blockDim.x;
+                    if (i < N) {
+                    a[i] = initialValue;
+                }
+                }
+                
+                int main()
+                {
+                    /*
+                    * Do not modify `N`.
+                    */
+                
+                    int N = 1000;
+                
+                    int *a;
+                    size_t size = N * sizeof(int);
+                
+                    cudaMallocManaged(&a, size);
+                
+                    /*
+                    * Assume we have reason to want the number of threads
+                    * fixed at `256`: do not modify `threads_per_block`.
+                    */
+                
+                    size_t threads_per_block = 256;
+                
+                    /*
+                    * Assign a value to `number_of_blocks` that will
+                    * allow for a working execution configuration given
+                    * the fixed values for `N` and `threads_per_block`.
+                    */
+                
+                    size_t number_of_blocks = (N + threads_per_block - 1) / threads_per_block;
+                
+                    int initialValue = 6;
+                
+                    initializeElementsTo<<< number_of_blocks, threads_per_block >>>(initialValue, a, N);
+                    cudaDeviceSynchronize();
+                
+                    /*
+                    * Check to make sure all values in `a`, were initialized.
+                    */
+                
+                    for (int i = 0; i < N; ++i)
+                    {
+                    if(a[i] != initialValue)
+                    {
+                        printf("FAILURE: target value: %d\t a[%d]: %d\n", initialValue, i, a[i]);
+                        cudaFree(a);
+                        exit(1);
+                    }
+                    }
+                    printf("SUCCESS!\n");
+                
+                    cudaFree(a);
+                    }
+                    </code></pre>
+                </div>
+
+                <div id="stl" class="tab-content">
+                    <pre><code class="language-python">
+                    #include < stdio.h >
+
+                    void init(int *a, int N)
+                    {
+                        int i;
+                        for (i = 0; i < N; ++i)
+                        {
+                        a[i] = i;
+                        }
+                    }
+                    
+                    /*
+                        * In the current application, `N` is larger than the grid.
+                        * Refactor this kernel to use a grid-stride loop in order that
+                        * each parallel thread work on more than one element of the array.
+                        */
+                    
+                    __global__
+                    void doubleElements(int *a, int N)
+                    {
+                        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+                        int stride = gridDim.x * blockDim.x;
+                        for (int i = idx; i < N; i += stride){
+                        a[i] *=2;
+                        }
+                    }
+                    
+                    bool checkElementsAreDoubled(int *a, int N)
+                    {
+                        int i;
+                        for (i = 0; i < N; ++i)
+                        {
+                        if (a[i] != i*2) return false;
+                        }
+                        return true;
+                    }
+                    
+                    int main()
+                    {
+                        /*
+                        * `N` is greater than the size of the grid (see below).
+                        */
+                    
+                        int N = 10000;
+                        int *a;
+                    
+                        size_t size = N * sizeof(int);
+                        cudaMallocManaged(&a, size);
+                    
+                        init(a, N);
+                    
+                        /*
+                        * The size of this grid is 256*32 = 8192.
+                        */
+                    
+                        size_t threads_per_block = 256;
+                        size_t number_of_blocks = 32;
+                    
+                        doubleElements<<<number_of_blocks, threads_per_block>>>(a, N);
+                        cudaDeviceSynchronize();
+                    
+                        bool areDoubled = checkElementsAreDoubled(a, N);
+                        printf("All elements were doubled? %s\n", areDoubled ? "TRUE" : "FALSE");
+                    
+                        cudaFree(a);
+                    }
+                        </code></pre>
+                    </div>
+    
+            </div>
+
+<h3 style="margin-top: 40px">Req's</h3>
+
+<li>The kernel should be defined using the __global__ keyword.</li>
+<li>The kernel should take in a variable number of arguments.</li>
+<li>The arguments should be passed to the kernel function using the <<<>>> syntax.</li>
+<li>The first argument is the number of blocks in the grid.</li>
+<li>The second argument is the number of threads in each block.</li>
+<li>The kernel should be executed using the cudaDeviceSynchronize() function.</li>
+<li>The code file should be in .cu format.</li>
+<li>The code file can be executed using nvcc compiler: "nvcc -o output.exe program_name.cu" and then "./output.exe" to run the program.</li>
+<li> you can install nvcc using "sudo apt-get install nvidia-cuda-toolkit" on ubuntu.</li>
+  
+  
+  
+        <footer class="post-footer">
 
 <!-- <nav class="paginav">
   <a class="prev" href="/posts/word_embedding/">
